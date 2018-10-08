@@ -46,6 +46,7 @@
 /* USER CODE BEGIN Includes */
 
 #include <stdint.h>
+#include "printf.h"
 
 /* USER CODE END Includes */
 
@@ -55,6 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 volatile uint16_t ADC_RAW = 0;
+volatile float DCBUS_VOLTAGE = 0;
 
 /* USER CODE END PV */
 
@@ -63,6 +65,9 @@ void SystemClock_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+
+void UART_putc(void* p, char c);
+void PowerOn_Safe();
 
 /* USER CODE END PFP */
 
@@ -104,6 +109,8 @@ int main(void)
   MX_ADC_Init();
   /* USER CODE BEGIN 2 */
 
+  init_printf(NULL, UART_putc);
+
   HAL_ADC_Start_IT(&hadc);
 
 
@@ -111,6 +118,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  HAL_Delay(2000);
+
+  PowerOn_Safe();
+
   while (1)
   {
 
@@ -118,25 +130,11 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-	  HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+	  HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
 	  HAL_Delay(500);
-	  HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
-	  HAL_Delay(500);
-
   }
   /* USER CODE END 3 */
 
-}
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC))
-	{
-		ADC_RAW = HAL_ADC_GetValue(hadc);
-		HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
-	}
 }
 
 /**
@@ -152,10 +150,8 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
-  RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -195,6 +191,52 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void PowerOn_Safe()
+{
+	uint16_t startTick = HAL_GetTick();
+	HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_SET);
+	HAL_Delay(RELAY_DELAY);
+	HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_SET);
+	HAL_Delay(RELAY_DELAY);
+
+	while(DCBUS_VOLTAGE < NOMINAL_VOLTAGE - (NOMINAL_VOLTAGE * NOMINAL_VOLTAGE_TOLERANCE))
+	{
+		//Do nothing besides check the timeout
+		if(HAL_GetTick() > startTick + PRECHARGE_TIMEOUT)
+		{
+			HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+			printf("FAILED TO PRECHARGE IN SUITABLE TIME!");
+			break;
+		}
+	}
+
+	HAL_GPIO_WritePin(POSITIVE_RELAY_GPIO_Port, POSITIVE_RELAY_Pin, GPIO_PIN_SET);
+	HAL_Delay(RELAY_DELAY);
+	HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
+	printf("Precharge done! DC Bus voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+
+	//Convert ADC reading into DC bus voltage
+    ADC_RAW = (float)HAL_ADC_GetValue(hadc);
+    DCBUS_VOLTAGE = (ADC_RAW * (3.3 / 4096.0)) / 0.04347826086956521739130434782609; // calculated from R2 / (R1 + R2)
+}
+
+void ADC_IRQHandler()
+{
+    HAL_ADC_IRQHandler(&hadc);
+}
+
+void UART_putc(void* p, char c)
+{
+	HAL_UART_Transmit(&huart1, &c, 1, 100);
+}
 
 /* USER CODE END 4 */
 

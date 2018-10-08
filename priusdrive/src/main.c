@@ -22,20 +22,36 @@ void SysTick_Handler (void)
 		comm_pos = 1;
 		//Inverter_SetState(false);
 	}
+	*/
 
 	Inverter_Commutate(comm_pos);
 
+	/*
 	uint8_t hallpos = Hall_GetPosition();
 	printf("C:%d, H:%d\r\n\r\n", comm_pos, hallpos);
 
 	comm_pos++;
 	*/
 
-	//if(count <= 10) count = 10;
+	/*
+	if(Systick_Enabled == 1)
+	{
+		if(count <= 70)
+		{
+			count = 70;
+			//Systick_Enabled = 0;
+			//TIM_Cmd(TIM3, DISABLE);
+			//Hall_EnableInterrupt();
+			//printf("Closed loop!\r\n");
+		}
 
-	TIM_SetAutoreload(TIM3, count);
+		TIM_SetAutoreload(TIM3, count);
 
-	if(count > 75) count--; //75
+		count--; //75
+	}
+	*/
+
+
 
 	//printf("Count: %d\r\n", count);
 
@@ -43,7 +59,7 @@ void SysTick_Handler (void)
 
 int main(void)
 {
-	SysTick_Init(5);
+	SysTick_Init(15);
 
 	UART_Initialise();
 	init_printf(NULL, UART_putc);
@@ -51,10 +67,10 @@ int main(void)
 	Inverter_Initialise();
 	LED_Initialise();
 	Hall_Initialise();
-	//Hall_DisableInterrupt();
-	Hall_EnableInterrupt();
-	Inverter_SetPWM(85);
-	tfp_printf("Done init!");
+	Hall_DisableInterrupt();
+	//Hall_EnableInterrupt();
+	Inverter_SetPWM(70);
+	//tfp_printf("Done init!");
 
 	uint16_t FREQUENCY_STEPS = 70; //Frequency divisions
 	uint16_t FREQUENCY_TOTAL = 10000; //Max commutation frequency
@@ -79,7 +95,7 @@ int main(void)
 
 	NVIC_Init(&NVIC_InitStructure);
 
-	TIM_Cmd(TIM3, DISABLE);
+	TIM_Cmd(TIM3, ENABLE);
 
 	while(1)
 	{

@@ -95,7 +95,7 @@ void Inverter_Initialise(void)
 
 	Inverter_SetState(true);
 
-	tfp_printf("Inverter configured and enabled!\r\n");
+	//tfp_printf("Inverter configured and enabled!\r\n");
 }
 
 

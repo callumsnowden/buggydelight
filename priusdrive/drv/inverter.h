@@ -9,7 +9,7 @@ extern void tfp_printf(char *fmt, ...);
 extern uint32_t SYSTEM_CLOCK;
 
 //DEFINES
-#define PWM_FREQUENCY 6400
+#define PWM_FREQUENCY 10000 //6400
 
 //PWM Mode
 //#define PWM_NORMAL

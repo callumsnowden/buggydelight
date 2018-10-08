@@ -42,7 +42,7 @@ void Hall_Initialise(void)
 	EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_Init(&EXTI_InitStruct);
 
-	tfp_printf("Hall driver initialised!\r\n");
+	//tfp_printf("Hall driver initialised!\r\n");
 }
 
 void Hall_DisableInterrupt(void)
@@ -78,7 +78,7 @@ void EXTI9_5_IRQHandler(void)
     	tfp_printf("%d\r\n", hallpos);
 
         //Commutate motor
-    	Inverter_Commutate(hallpos);
+    	//Inverter_Commutate(hallpos);
     }
 }
 

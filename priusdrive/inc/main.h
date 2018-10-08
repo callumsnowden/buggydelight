@@ -23,6 +23,8 @@ extern uint8_t Hall_GetPosition(void);
 
 void SysTick_Init(uint16_t frequency);
 
+uint8_t Systick_Enabled = 1;
+
 uint8_t comm_pos = 0;
 
 uint8_t count = 150;

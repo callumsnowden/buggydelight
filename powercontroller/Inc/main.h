@@ -71,6 +71,11 @@
 
 /* USER CODE BEGIN Private defines */
 
+#define NOMINAL_VOLTAGE 12 //Nominal voltage of the DC bus
+#define NOMINAL_VOLTAGE_TOLERANCE 0.2 //Percentage tolerance for voltage
+#define PRECHARGE_TIMEOUT 2000 //Precharge timeout delay in ms - if this is not reached in this time
+#define RELAY_DELAY 50 //Delay between throwing relays in ms
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
