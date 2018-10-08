@@ -2,7 +2,7 @@
 ADC.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4
 ADC.ContinuousConvMode=ENABLE
 ADC.IPParameters=ContinuousConvMode,SamplingTime,ClockPrescaler
-ADC.SamplingTime=ADC_SAMPLETIME_13CYCLES_5
+ADC.SamplingTime=ADC_SAMPLETIME_1CYCLE_5
 CAN.BS1=CAN_BS1_1TQ
 CAN.BS2=CAN_BS2_1TQ
 CAN.CalculateTimeBit=1000
