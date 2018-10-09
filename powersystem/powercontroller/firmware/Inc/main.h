@@ -76,6 +76,10 @@
 #define PRECHARGE_TIMEOUT 2000 //Precharge timeout delay in ms - if this is not reached in this time
 #define RELAY_DELAY 50 //Delay between throwing relays in ms
 
+#define BUFFER_LENGTH 32 //Debug UART RX buffer length
+
+#define DBG_PRINTF  (void)tfp_printf("%10d: ", HAL_GetTick());(void)tfp_printf
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

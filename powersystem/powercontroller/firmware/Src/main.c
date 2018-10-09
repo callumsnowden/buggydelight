@@ -47,6 +47,7 @@
 
 #include <stdint.h>
 #include "printf.h"
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -58,6 +59,26 @@
 volatile uint16_t ADC_RAW = 0;
 volatile float DCBUS_VOLTAGE = 0;
 
+enum PowerState {
+	PWR_ERROR = -1,
+	PWR_OFF,
+	PWR_OFF_REQUEST,
+	PWR_PRECHARGE,
+	PWR_ON,
+	PWR_ON_REQUEST
+};
+
+uint8_t state = PWR_OFF;
+
+uint8_t c = 'A';
+
+uint8_t EndOfLine = 0;
+
+uint8_t RXBuffer[BUFFER_LENGTH];
+
+uint8_t BufferPos = 0;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,6 +89,8 @@ void SystemClock_Config(void);
 
 void UART_putc(void* p, char c);
 void PowerOn_Safe();
+void PowerOn_Unsafe();
+void PowerOff();
 
 /* USER CODE END PFP */
 
@@ -111,17 +134,18 @@ int main(void)
 
   init_printf(NULL, UART_putc);
 
+  memset(RXBuffer, 0, BUFFER_LENGTH);
+
   HAL_ADC_Start_IT(&hadc);
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)&c, 1);
 
 
-  /* USER CODE END 2 */
+  /* USER CODE END 2 *
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  HAL_Delay(2000);
-
-  PowerOn_Safe();
+  DBG_PRINTF("Started\r\n");
 
   while (1)
   {
@@ -130,9 +154,59 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-	  HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
-	  HAL_Delay(500);
+	  if(EndOfLine)
+	  {
+		  EndOfLine = 0;
+		  BufferPos = 0;
+		  switch (RXBuffer[0])
+		  {
+		  case 'i':
+			  if(state == PWR_ON)
+			  {
+				  DBG_PRINTF("Already powered on\r\n");
+
+			  } else {
+				  state = PWR_ON_REQUEST;
+			  }
+			  break;
+
+		  case 'o':
+			  state = PWR_OFF_REQUEST;
+			  break;
+
+		  case 'u':
+			  PowerOn_Unsafe();
+			  break;
+
+		  case 'r':
+			  state = PWR_OFF;
+			  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
+			  break;
+
+		  case '?':
+			  DBG_PRINTF("DC Bus voltage: %dV. State: %d\r\n", (uint8_t)DCBUS_VOLTAGE, state);
+			  break;
+
+		  default:
+			  DBG_PRINTF("Invalid command. 'i' for safe power on, 'o' for power off, 'u' for unsafe power on, 'r' to reset error, '?' to request status report\r\n");
+			  break;
+		  }
+
+		  memset(RXBuffer, 0, BUFFER_LENGTH);
+	  }
+
+	  switch (state)
+	  {
+	  case PWR_ON_REQUEST:
+		  PowerOn_Safe();
+		  break;
+
+	  case PWR_OFF_REQUEST:
+		  PowerOff();
+		  break;
+	  }
   }
+
   /* USER CODE END 3 */
 
 }
@@ -194,30 +268,96 @@ void SystemClock_Config(void)
 
 void PowerOn_Safe()
 {
-	uint16_t startTick = HAL_GetTick();
-	HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_SET);
-	HAL_Delay(RELAY_DELAY);
-	HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_SET);
-	HAL_Delay(RELAY_DELAY);
-
-	while(DCBUS_VOLTAGE < NOMINAL_VOLTAGE - (NOMINAL_VOLTAGE * NOMINAL_VOLTAGE_TOLERANCE))
+	if(state == PWR_ON_REQUEST)
 	{
-		//Do nothing besides check the timeout
-		if(HAL_GetTick() > startTick + PRECHARGE_TIMEOUT)
-		{
-			HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
-			printf("FAILED TO PRECHARGE IN SUITABLE TIME!");
-			break;
-		}
-	}
+		uint32_t startTick = HAL_GetTick();
+		DBG_PRINTF("Requested safe power on\r\n");
+		state = PWR_PRECHARGE;
 
-	HAL_GPIO_WritePin(POSITIVE_RELAY_GPIO_Port, POSITIVE_RELAY_Pin, GPIO_PIN_SET);
-	HAL_Delay(RELAY_DELAY);
-	HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
-	printf("Precharge done! DC Bus voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
+		HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_SET);
+		HAL_Delay(RELAY_DELAY);
+		HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_SET);
+		HAL_Delay(RELAY_DELAY);
+
+		while(DCBUS_VOLTAGE < NOMINAL_VOLTAGE - (NOMINAL_VOLTAGE * NOMINAL_VOLTAGE_TOLERANCE))
+		{
+			//Do nothing besides check the timeout
+			if(HAL_GetTick() > startTick + PRECHARGE_TIMEOUT)
+			{
+				HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+				HAL_Delay(RELAY_DELAY);
+				HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_RESET);
+				DBG_PRINTF("Precharge failed in specified timeout!\r\n");
+				state = PWR_ERROR;
+				break;
+			}
+		}
+
+		if(DCBUS_VOLTAGE > NOMINAL_VOLTAGE - (NOMINAL_VOLTAGE * NOMINAL_VOLTAGE_TOLERANCE))
+		{
+			HAL_GPIO_WritePin(POSITIVE_RELAY_GPIO_Port, POSITIVE_RELAY_Pin, GPIO_PIN_SET);
+			HAL_Delay(RELAY_DELAY);
+			HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port, ORANGE_LED_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);
+			DBG_PRINTF("Precharge done in %d ticks. DC Bus voltage: %dV\r\n", (uint8_t)(HAL_GetTick() - startTick), (uint8_t)DCBUS_VOLTAGE);
+			state = PWR_ON;
+		} else {
+
+		}
+	} else {
+		DBG_PRINTF("State not off! Current state: %d\r\n", state);
+	}
+}
+
+void PowerOn_Unsafe()
+{
+	if(state == PWR_OFF)
+	{
+		DBG_PRINTF("Requested unsafe power on\r\n");
+		HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_SET);
+		HAL_Delay(RELAY_DELAY);
+		HAL_GPIO_WritePin(POSITIVE_RELAY_GPIO_Port, POSITIVE_RELAY_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);
+		DBG_PRINTF("Unsafe power on complete\r\n");
+		state = PWR_ON;
+	} else {
+		DBG_PRINTF("State not off! Current state: %d\r\n", state);
+	}
+}
+
+void PowerOff()
+{
+	/*
+	if(state == PWR_PRECHARGE)
+	{
+		DBG_PRINTF("Requested precharge abort! DC Bus voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
+		HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+		HAL_Delay(RELAY_DELAY);
+		HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_RESET);
+		DBG_PRINTF("Precharge abort complete\r\n");
+		state = PWR_OFF;
+	} else {
+		DBG_PRINTF("State not off! Current state: %d\r\n", state);
+	}
+	*/
+
+	if(state == PWR_OFF_REQUEST)
+	{
+		DBG_PRINTF("Requested power off. DC Bus voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
+		HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+		HAL_Delay(RELAY_DELAY);
+		HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);
+		DBG_PRINTF("Power off complete\r\n");
+		state = PWR_OFF;
+	} else {
+		DBG_PRINTF("State not off! Current state: %d\r\n", state);
+	}
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -227,6 +367,22 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     ADC_RAW = (float)HAL_ADC_GetValue(hadc);
     DCBUS_VOLTAGE = (ADC_RAW * (3.3 / 4096.0)) / 0.04347826086956521739130434782609; // calculated from R2 / (R1 + R2)
 }
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+
+    HAL_UART_Receive_IT(&huart1, &c, 1);
+    RXBuffer[BufferPos++] = c;
+
+    if(c == '\n' || c == '\r')
+    {
+        EndOfLine = 1;
+        RXBuffer[BufferPos++] = '\0';
+    }
+
+}
+
 
 void ADC_IRQHandler()
 {
@@ -268,7 +424,7 @@ void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     tex: DBG_PRINTF("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
