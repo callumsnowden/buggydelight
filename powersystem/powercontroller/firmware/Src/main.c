@@ -154,6 +154,13 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
+	  /*
+	  HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_SET);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+	  HAL_Delay(1000);
+	  */
+
 	  if(EndOfLine)
 	  {
 		  EndOfLine = 0;
@@ -193,6 +200,13 @@ int main(void)
 		  }
 
 		  memset(RXBuffer, 0, BUFFER_LENGTH);
+	  }
+
+	  if(DCBUS_VOLTAGE < NOMINAL_VOLTAGE - (NOMINAL_VOLTAGE * NOMINAL_VOLTAGE_TOLERANCE) && state == PWR_ON)
+	  {
+		  state = PWR_OFF_REQUEST;
+		  DBG_PRINTF("DC Bus voltage error! Current voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
 	  }
 
 	  switch (state)
@@ -350,6 +364,8 @@ void PowerOff()
 	{
 		DBG_PRINTF("Requested power off. DC Bus voltage: %dV\r\n", (uint8_t)DCBUS_VOLTAGE);
 		HAL_GPIO_WritePin(PRECHARGE_RELAY_GPIO_Port, PRECHARGE_RELAY_Pin, GPIO_PIN_RESET);
+		HAL_Delay(RELAY_DELAY);
+		HAL_GPIO_WritePin(POSITIVE_RELAY_GPIO_Port, POSITIVE_RELAY_Pin, GPIO_PIN_RESET);
 		HAL_Delay(RELAY_DELAY);
 		HAL_GPIO_WritePin(NEGATIVE_RELAY_GPIO_Port, NEGATIVE_RELAY_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);

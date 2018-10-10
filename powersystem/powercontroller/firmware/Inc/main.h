@@ -72,9 +72,9 @@
 /* USER CODE BEGIN Private defines */
 
 #define NOMINAL_VOLTAGE 12 //Nominal voltage of the DC bus
-#define NOMINAL_VOLTAGE_TOLERANCE 0.2 //Percentage tolerance for voltage
-#define PRECHARGE_TIMEOUT 2000 //Precharge timeout delay in ms - if this is not reached in this time
-#define RELAY_DELAY 50 //Delay between throwing relays in ms
+#define NOMINAL_VOLTAGE_TOLERANCE 0.25 //Percentage tolerance for voltage
+#define PRECHARGE_TIMEOUT 10000 //Precharge timeout delay in ms - if this is not reached in this time
+#define RELAY_DELAY 100 //Delay between throwing relays in ms
 
 #define BUFFER_LENGTH 32 //Debug UART RX buffer length
 
