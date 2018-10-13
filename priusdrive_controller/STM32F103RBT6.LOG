@@ -1,0 +1,20 @@
+Importer Log Report
+Project : priusdrive_controller.PrjPcb
+
+Section : Import Document - C:\Users\callum.snowden\Downloads\STM32F103RBT6.lia
+    Section : PCB Library - STM32F103RBT6.PcbLib
+        Section : Load Messages
+            Warning - 1 : Skipping Token STM32F103RBT6 On Line 498
+            Warning - 1 : Skipping Token attachedSymbol On Line 1165
+        EndSection
+    EndSection
+
+    Section : SCH Library - STM32F103RBT6.SchLib
+        Section : Parsing Messages
+            Warning - 1 : Skipping Token padStyleDef On Line 9
+            Warning - 1 : Skipping Token multiLayer On Line 84
+            Warning - 1 : Skipping Token layerContents On Line 150
+            Warning - 1 : Skipping Token layerContents On Line 161
+        EndSection
+    EndSection
+EndSection
