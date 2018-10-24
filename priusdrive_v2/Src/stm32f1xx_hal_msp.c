@@ -91,6 +91,9 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef* htim_oc)
   /* USER CODE END TIM1_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM1_CLK_ENABLE();
+    /* TIM1 interrupt Init */
+    HAL_NVIC_SetPriority(TIM1_TRG_COM_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
   /* USER CODE END TIM1_MspInit 1 */
@@ -98,11 +101,11 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef* htim_oc)
 
 }
 
-void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
+void HAL_TIMEx_HallSensor_MspInit(TIM_HandleTypeDef* htimex_hallsensor)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(htim_ic->Instance==TIM2)
+  if(htimex_hallsensor->Instance==TIM2)
   {
   /* USER CODE BEGIN TIM2_MspInit 0 */
 
@@ -127,6 +130,9 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef* htim_ic)
 
     __HAL_AFIO_REMAP_TIM2_PARTIAL_2();
 
+    /* TIM2 interrupt Init */
+    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM2_IRQn);
   /* USER CODE BEGIN TIM2_MspInit 1 */
 
   /* USER CODE END TIM2_MspInit 1 */
@@ -171,6 +177,9 @@ void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef* htim_oc)
   /* USER CODE END TIM1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM1_CLK_DISABLE();
+
+    /* TIM1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM1_TRG_COM_IRQn);
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
   /* USER CODE END TIM1_MspDeInit 1 */
@@ -178,10 +187,10 @@ void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef* htim_oc)
 
 }
 
-void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
+void HAL_TIMEx_HallSensor_MspDeInit(TIM_HandleTypeDef* htimex_hallsensor)
 {
 
-  if(htim_ic->Instance==TIM2)
+  if(htimex_hallsensor->Instance==TIM2)
   {
   /* USER CODE BEGIN TIM2_MspDeInit 0 */
 
@@ -198,6 +207,8 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* htim_ic)
 
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10);
 
+    /* TIM2 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM2_IRQn);
   /* USER CODE BEGIN TIM2_MspDeInit 1 */
 
   /* USER CODE END TIM2_MspDeInit 1 */
@@ -226,6 +237,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* USART2 interrupt Init */
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
   /* USER CODE BEGIN USART2_MspInit 1 */
 
   /* USER CODE END USART2_MspInit 1 */
@@ -250,6 +264,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     */
     HAL_GPIO_DeInit(GPIOA, USART_TX_Pin|USART_RX_Pin);
 
+    /* USART2 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USART2_IRQn);
   /* USER CODE BEGIN USART2_MspDeInit 1 */
 
   /* USER CODE END USART2_MspDeInit 1 */

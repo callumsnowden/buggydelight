@@ -1,3 +1,4 @@
+
 /**
   ******************************************************************************
   * @file           : main.c
@@ -140,7 +141,7 @@ int main(void)
   HAL_UART_Receive_IT(&huart1, (uint8_t *)&c, 1);
 
 
-  /* USER CODE END 2 *
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
