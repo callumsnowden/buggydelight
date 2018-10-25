@@ -48,6 +48,8 @@
 /* Exported functions ------------------------------------------------------- */
 
 void SysTick_Handler(void);
+void ADC1_2_IRQHandler(void);
+void TIM1_BRK_IRQHandler(void);
 void TIM1_TRG_COM_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void USART2_IRQHandler(void);
