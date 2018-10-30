@@ -189,6 +189,15 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim)
+{
+	//Timer commutation callback
+	if (htim->Instance == TIM1)
+	{
+		DBG_PRINTF("Commutation interrupt fired on tim1\r\n");
+	}
+}
+
 /* USER CODE END 4 */
 
 /**
