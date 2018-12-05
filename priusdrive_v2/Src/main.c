@@ -103,7 +103,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();
-  MX_TIM2_Init();
   MX_TIM3_Init();
   MX_CAN_Init();
   MX_ADC1_Init();
@@ -198,6 +197,18 @@ void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
+void UART_putc(void* p, char c)
+{
+	HAL_UART_Transmit(&huart2, &c, 1, 100);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	DBG_PRINTF("GPIO interrupt\r\n");
+	GPIOC_Data = GPIOC->IDR;
+
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -214,11 +225,6 @@ void _Error_Handler(char *file, int line)
   {
   }
   /* USER CODE END Error_Handler_Debug */
-}
-
-void UART_putc(void* p, char c)
-{
-	HAL_UART_Transmit(&huart2, &c, 1, 100);
 }
 
 #ifdef  USE_FULL_ASSERT

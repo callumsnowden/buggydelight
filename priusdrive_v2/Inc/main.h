@@ -60,10 +60,6 @@
 #define MOTOR_TEMP_GPIO_Port GPIOC
 #define INVERTER_TEMP_Pin GPIO_PIN_3
 #define INVERTER_TEMP_GPIO_Port GPIOC
-#define HALL_U_Pin GPIO_PIN_0
-#define HALL_U_GPIO_Port GPIOA
-#define HALL_V_Pin GPIO_PIN_1
-#define HALL_V_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
@@ -86,12 +82,19 @@
 #define BOOST_SHUTDOWN_GPIO_Port GPIOB
 #define BOOST_FAIL_Pin GPIO_PIN_2
 #define BOOST_FAIL_GPIO_Port GPIOB
-#define HALL_W_Pin GPIO_PIN_10
-#define HALL_W_GPIO_Port GPIOB
 #define FAULT_OUT_Pin GPIO_PIN_11
 #define FAULT_OUT_GPIO_Port GPIOB
 #define COMMS_LED_Pin GPIO_PIN_13
 #define COMMS_LED_GPIO_Port GPIOB
+#define HALL_U_Pin GPIO_PIN_6
+#define HALL_U_GPIO_Port GPIOC
+#define HALL_U_EXTI_IRQn EXTI9_5_IRQn
+#define HALL_V_Pin GPIO_PIN_7
+#define HALL_V_GPIO_Port GPIOC
+#define HALL_V_EXTI_IRQn EXTI9_5_IRQn
+#define HALL_W_Pin GPIO_PIN_8
+#define HALL_W_GPIO_Port GPIOC
+#define HALL_W_EXTI_IRQn EXTI9_5_IRQn
 #define MOT_U_Pin GPIO_PIN_8
 #define MOT_U_GPIO_Port GPIOA
 #define MOT_V_Pin GPIO_PIN_9
@@ -104,6 +107,8 @@
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+
+uint16_t GPIOC_Data = 0;
 
 /* ########################## Assert Selection ############################## */
 /**
