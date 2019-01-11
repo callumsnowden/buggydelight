@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -75,6 +75,8 @@
 #define NOMINAL_VOLTAGE_TOLERANCE 0.25 //Percentage tolerance for voltage
 #define PRECHARGE_TIMEOUT 10000 //Precharge timeout delay in ms - if this is not reached in this time
 #define RELAY_DELAY 100 //Delay between throwing relays in ms
+
+#define CAN_ADDRESS 0x320
 
 #define BUFFER_LENGTH 32 //Debug UART RX buffer length
 

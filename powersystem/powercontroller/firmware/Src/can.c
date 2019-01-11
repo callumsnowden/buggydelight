@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -44,8 +44,11 @@
 
 /* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */
+CanTxMsgTypeDef TxMessage;
+CanRxMsgTypeDef RxMessage;
+CAN_FilterConfTypeDef  sFilterConfig;
 
+/* USER CODE END 0 */
 CAN_HandleTypeDef hcan;
 
 /* CAN init function */
@@ -53,14 +56,14 @@ void MX_CAN_Init(void)
 {
 
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 16;
+  hcan.Init.Prescaler = 6;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SJW = CAN_SJW_1TQ;
-  hcan.Init.BS1 = CAN_BS1_1TQ;
-  hcan.Init.BS2 = CAN_BS2_1TQ;
+  hcan.Init.BS1 = CAN_BS1_13TQ;
+  hcan.Init.BS2 = CAN_BS2_2TQ;
   hcan.Init.TTCM = DISABLE;
   hcan.Init.ABOM = ENABLE;
-  hcan.Init.AWUM = DISABLE;
+  hcan.Init.AWUM = ENABLE;
   hcan.Init.NART = DISABLE;
   hcan.Init.RFLM = DISABLE;
   hcan.Init.TXFP = DISABLE;
@@ -68,6 +71,29 @@ void MX_CAN_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+  hcan.pRxMsg = &RxMessage;
+
+  hcan.pTxMsg = &TxMessage;
+  hcan.pTxMsg->StdId = 0x321;
+  hcan.pTxMsg->ExtId = 0x0;
+  hcan.pTxMsg->RTR = CAN_RTR_DATA;
+  hcan.pTxMsg->IDE = CAN_ID_STD;
+  hcan.pTxMsg->DLC = 2;
+  hcan.pTxMsg->Data[0] = 0;
+
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.BankNumber = 14;
+
+  HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 
 }
 

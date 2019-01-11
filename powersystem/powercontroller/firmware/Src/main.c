@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -46,6 +46,7 @@
 
 /* USER CODE BEGIN Includes */
 
+#include <math.h>
 #include <stdint.h>
 #include "printf.h"
 #include <string.h>
@@ -78,6 +79,8 @@ uint8_t EndOfLine = 0;
 uint8_t RXBuffer[BUFFER_LENGTH];
 
 uint8_t BufferPos = 0;
+
+uint16_t SystickCounter = 0;
 
 
 /* USER CODE END PV */
@@ -133,12 +136,19 @@ int main(void)
   MX_ADC_Init();
   /* USER CODE BEGIN 2 */
 
+  //This magic makes CAN bus work when debugging, apparently
+  hcan.Instance->MCR = 0x60;
+
+  //Initialise printf
   init_printf(NULL, UART_putc);
 
+  //Allocate some empty memory for UART
   memset(RXBuffer, 0, BUFFER_LENGTH);
 
+  //Start various bits
   HAL_ADC_Start_IT(&hadc);
   HAL_UART_Receive_IT(&huart1, (uint8_t *)&c, 1);
+  HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
 
 
   /* USER CODE END 2 */
@@ -220,6 +230,7 @@ int main(void)
 		  PowerOff();
 		  break;
 	  }
+
   }
 
   /* USER CODE END 3 */
@@ -400,6 +411,30 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 
 }
 
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *CanHandle)
+{
+	if(CanHandle->pRxMsg->StdId == CAN_ADDRESS && CanHandle->pRxMsg->IDE == CAN_ID_STD && CanHandle->pRxMsg->DLC == 1)
+	{
+		if(CanHandle->pRxMsg->Data[0] == 1)
+		{
+			if(state == PWR_ON)
+			{
+				DBG_PRINTF("CANBUS: Already powered on\r\n");
+			} else {
+				DBG_PRINTF("CANBUS: Request to power on\r\n");
+				state = PWR_ON_REQUEST;
+			}
+		}
+
+		if(CanHandle->pRxMsg->Data[0] == 0)
+		{
+			DBG_PRINTF("CANBUS: Request to power off\r\n");
+			state = PWR_OFF_REQUEST;
+		}
+	}
+
+	HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
+}
 
 void ADC_IRQHandler()
 {
@@ -409,6 +444,32 @@ void ADC_IRQHandler()
 void UART_putc(void* p, char c)
 {
 	HAL_UART_Transmit(&huart1, &c, 1, 100);
+}
+
+void HAL_SYSTICK_Callback()
+{
+	if(SystickCounter == 1000)
+	{
+		SystickCounter = 0;
+
+		if(state != PWR_ON)
+		{
+			HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
+		}
+	}
+
+	if(SystickCounter % 100 == 0)
+	{
+		hcan.pTxMsg->Data[0] = (uint8_t)ceil(DCBUS_VOLTAGE);
+		hcan.pTxMsg->Data[1] = state;
+
+		if(HAL_CAN_Transmit(&hcan, 10) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	}
+
+	SystickCounter++;
 }
 
 /* USER CODE END 4 */
@@ -423,9 +484,7 @@ void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  while(1)
-  {
-  }
+
   /* USER CODE END Error_Handler_Debug */
 }
 
