@@ -139,6 +139,10 @@ int main(void)
   //This magic makes CAN bus work when debugging, apparently
   hcan.Instance->MCR = 0x60;
 
+  HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);
+
   //Initialise printf
   init_printf(NULL, UART_putc);
 
@@ -451,7 +455,10 @@ void HAL_SYSTICK_Callback()
 	if(SystickCounter == 1000)
 	{
 		SystickCounter = 0;
+	}
 
+	if(SystickCounter % 500 == 0)
+	{
 		if(state != PWR_ON)
 		{
 			HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
