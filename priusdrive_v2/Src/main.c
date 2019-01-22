@@ -56,6 +56,25 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t HallPos = 0;
+
+uint8_t step = 0;
+
+uint8_t pwm = 20;
+
+#define PWM_INVERTED
+
+static const uint8_t COMM_TABLE[8][3] = {
+		//U, V, W
+		{0, 0, 0},
+		{0, 0, 1},
+		{0, 1, 1},
+		{0, 1, 0},
+		{1, 1, 0},
+		{1, 0, 0},
+		{1, 0, 1},
+		{1, 1, 1}
+};
 
 /* USER CODE END PV */
 
@@ -112,6 +131,13 @@ int main(void)
 
   DBG_PRINTF("Done peripheral init\r\n");
 
+  TIM1->CCR1 = pwm;
+  TIM1->CCR2 = pwm;
+  TIM1->CCR3 = pwm;
+
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 
   /* USER CODE END 2 */
 
@@ -142,12 +168,13 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -160,7 +187,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
@@ -176,7 +203,8 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  //HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/100);
 
     /**Configure the Systick 
     */
@@ -204,8 +232,70 @@ void UART_putc(void* p, char c)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	DBG_PRINTF("GPIO interrupt\r\n");
-	GPIOC_Data = GPIOC->IDR;
+
+	HallPos = (((GPIOC->IDR) >> 6) & 0x5) + 1;
+	DBG_PRINTF("Hall position %u\r\n", HallPos);
+	/*
+	uint8_t BU = COMM_TABLE[HallPos][0];
+	uint8_t BV = COMM_TABLE[HallPos][1];
+	uint8_t BW = COMM_TABLE[HallPos][2];
+
+	if(!BU) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	if(!BV) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	if(!BW) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+
+	if(BU)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	}
+
+	if(BV)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	}
+
+	if(BW)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	}
+	*/
+}
+
+void HAL_SYSTICK_Callback()
+{
+	if(step == 7)
+	{
+		step = 1;
+	}
+
+	uint8_t BU = COMM_TABLE[step][0];
+	uint8_t BV = COMM_TABLE[step][1];
+	uint8_t BW = COMM_TABLE[step][2];
+
+	if(!BU) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	if(!BV) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	if(!BW) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+
+	if(BU)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	}
+
+	if(BV)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	}
+
+	if(BW)
+	{
+		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	}
+
+	step++;
+
+	TIM1->CCR1 = pwm;
+	TIM1->CCR2 = pwm;
+	TIM1->CCR3 = pwm;
 
 }
 

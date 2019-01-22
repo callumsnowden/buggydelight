@@ -1,0 +1,8 @@
+Removed Pin From Net: NetName=NetC6_2 Pin=C7-1
+Removed Pin From Net: NetName=NetC7_2 Pin=C7-2
+Change Component DesignItemId : Designator=C7 Old DesignItemId=CMP-1033-00528-1 New DesignItemId=CMP-1035-01477-1
+Change Component Footprint: Designator=C7 Old Footprint=CAPC0201(0603)33_N New Footprint=CAPC0603(1608)100_L
+Change Component Comment : Designator=C7 Old Comment=CAP 220pF 25V 0201(0603) New Comment=CAP 220pF 100V 0603(1608)
+Added Pin To Net: NetName=NetC7_2 Pin=C7-1
+Added Pin To Net: NetName=NetC6_2 Pin=C7-2
+Change Net Name : Old Net Name=NetC7_2 New Net Name=NetC7_1

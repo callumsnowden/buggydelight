@@ -154,17 +154,17 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PA7     ------> ADC1_IN7
     PB0     ------> ADC1_IN8 
     */
-    GPIO_InitStruct.Pin = HV_CURRENT_Pin|THROTTLE_Pin|MOTOR_TEMP_Pin|INVERTER_TEMP_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = DCLINK_VOLTAGE_Pin|DCBUS_VOLTAGE_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = LV_CURRENT_Pin;
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    HAL_GPIO_Init(LV_CURRENT_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* ADC1 interrupt Init */
     HAL_NVIC_SetPriority(ADC1_2_IRQn, 0, 0);
@@ -195,11 +195,11 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     PA7     ------> ADC1_IN7
     PB0     ------> ADC1_IN8 
     */
-    HAL_GPIO_DeInit(GPIOC, HV_CURRENT_Pin|THROTTLE_Pin|MOTOR_TEMP_Pin|INVERTER_TEMP_Pin);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
 
-    HAL_GPIO_DeInit(GPIOA, DCLINK_VOLTAGE_Pin|DCBUS_VOLTAGE_Pin);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_7);
 
-    HAL_GPIO_DeInit(LV_CURRENT_GPIO_Port, LV_CURRENT_Pin);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
 
     /* ADC1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
