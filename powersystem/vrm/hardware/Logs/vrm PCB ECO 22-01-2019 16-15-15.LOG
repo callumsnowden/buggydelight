@@ -1,0 +1,3 @@
+Change Component DesignItemId : Designator=L2 Old DesignItemId=Inductor New DesignItemId=CMP-2000-06765-1
+Change Component Footprint: Designator=L2 Old Footprint=SER2900_Series New Footprint=COIL-MSS1038_V
+Change Component Comment : Designator=L2 Old Comment=Inductor New Comment=MSS1038-683MLB
