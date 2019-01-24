@@ -1,0 +1,9 @@
+Added Component: Designator=P6(HDR1X2)
+Added Component: Designator=R36(RESC0805(2012)_L)
+Added Pin To Net: NetName=NetP4_4 Pin=P6-1
+Added Pin To Net: NetName=NetP4_2 Pin=R36-1
+Added Pin To Net: NetName=NetP6_2 Pin=P6-2
+Added Pin To Net: NetName=NetP6_2 Pin=R36-2
+Added Net: Name=NetP6_2
+Added Member To Class: ClassName=Microcontroller Member=Component P6 Header 2
+Added Member To Class: ClassName=Microcontroller Member=Component R36 120R 5% 0805(2012)
