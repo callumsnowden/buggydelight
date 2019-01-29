@@ -1,0 +1,7 @@
+Change Component Footprint: Designator=R36 Old Footprint=RESC0805(2012)_L New Footprint=RESC0805(2012)_N
+Added Component: Designator=Lightpipe1(Dialight_515-1094)
+Added Component: Designator=Lightpipe2(Dialight_515-1094)
+Added Component: Designator=Lightpipe3(Dialight_515-1094)
+Added Member To Class: ClassName=Microcontroller Member=Component Lightpipe1 Lightpipe
+Added Member To Class: ClassName=Microcontroller Member=Component Lightpipe2 Lightpipe
+Added Member To Class: ClassName=Microcontroller Member=Component Lightpipe3 Lightpipe
