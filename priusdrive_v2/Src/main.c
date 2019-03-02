@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -60,7 +60,7 @@ uint8_t HallPos = 0;
 
 uint8_t step = 0;
 
-uint8_t pwm = 20;
+uint8_t pwm = 30;
 
 #define PWM_INVERTED
 
@@ -125,6 +125,7 @@ int main(void)
   MX_TIM3_Init();
   MX_CAN_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   init_printf(NULL, UART_putc);
@@ -139,6 +140,8 @@ int main(void)
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 
+  HAL_TIMEx_HallSensor_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -149,6 +152,34 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+
+
+	  	uint8_t BU = COMM_TABLE[step][0];
+	  	uint8_t BV = COMM_TABLE[step][1];
+	  	uint8_t BW = COMM_TABLE[step][2];
+
+	  	if(!BU) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+	  	if(!BV) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+	  	if(!BW) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+
+	  	if(BU)
+	  	{
+	  		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	  	}
+
+	  	if(BV)
+	  	{
+	  		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	  	}
+
+	  	if(BW)
+	  	{
+	  		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	  	}
+
+	  	TIM1->CCR1 = pwm;
+	  	TIM1->CCR2 = pwm;
+	  	TIM1->CCR3 = pwm;
 
   }
   /* USER CODE END 3 */
@@ -203,8 +234,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  //HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/100);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
     /**Configure the Systick 
     */
@@ -230,39 +260,9 @@ void UART_putc(void* p, char c)
 	HAL_UART_Transmit(&huart2, &c, 1, 100);
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-
-	HallPos = (((GPIOC->IDR) >> 6) & 0x5) + 1;
-	DBG_PRINTF("Hall position %u\r\n", HallPos);
-	/*
-	uint8_t BU = COMM_TABLE[HallPos][0];
-	uint8_t BV = COMM_TABLE[HallPos][1];
-	uint8_t BW = COMM_TABLE[HallPos][2];
-
-	if(!BU) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-	if(!BV) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-	if(!BW) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-
-	if(BU)
-	{
-		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	}
-
-	if(BV)
-	{
-		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	}
-
-	if(BW)
-	{
-		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-	}
-	*/
-}
-
 void HAL_SYSTICK_Callback()
 {
+	/*
 	if(step == 7)
 	{
 		step = 1;
@@ -296,7 +296,23 @@ void HAL_SYSTICK_Callback()
 	TIM1->CCR1 = pwm;
 	TIM1->CCR2 = pwm;
 	TIM1->CCR3 = pwm;
+	*/
 
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM2)
+	{
+		//DBG_PRINTF("hall timer callback");
+
+		if(step == 7)
+		{
+			step = 1;
+		}
+
+		step++;
+	}
 }
 
 /* USER CODE END 4 */
