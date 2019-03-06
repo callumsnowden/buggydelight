@@ -116,6 +116,14 @@ void MX_ADC_Init(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_VREFINT;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)

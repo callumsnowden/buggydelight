@@ -29,7 +29,7 @@ PushECOToAnnotationFile=1
 DItemRevisionGUID=
 ReportSuppressedErrorsInMessages=0
 ForceUpdateCount=0
-OutputPath=
+OutputPath=Outputs
 LogFolderPath=
 ManagedProjectGUID=
 LinkedManagedProjectGUID=
@@ -191,6 +191,9 @@ OutputJobsCount=1
 DocumentReferenceClass1=DocumentReference
 OutputJobFileName1=vrm.OutJob
 
+[Generic_EDE]
+OutputDir=Outputs
+
 [OutputGroup1]
 Name=Netlist Outputs
 Description=
@@ -205,7 +208,7 @@ OutputDefault1=0
 [OutputGroup2]
 Name=Simulator Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Adobe PDF
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintWhat=1
 
 [OutputGroup3]

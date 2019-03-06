@@ -53,6 +53,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 __uint16_t LoopCount = 0;
+__uint16_t vddVoltage = 0;
 
 /* USER CODE END PV */
 
