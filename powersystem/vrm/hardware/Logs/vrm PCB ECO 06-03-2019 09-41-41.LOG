@@ -1,0 +1,10 @@
+Removed Pin From Net: NetName=GND Pin=Q2-3
+Removed Pin From Net: NetName=+12V_AUX Pin=R1-1
+Removed Pin From Net: NetName=GND Pin=R4-1
+Removed Member From Class: ClassName=12V Main PSU Member=Q2
+Removed Member From Class: ClassName=12V Main PSU Member=R1
+Added Pin To Net: NetName=GND Pin=R4-2
+Added Pin To Net: NetName=NetR4_1 Pin=R4-1
+Added Pin To Net: NetName=NetR4_1 Pin=U1-4
+Added Pin To Net: NetName=NetR4_1 Pin=U6-41
+Added Net: Name=NetR4_1
