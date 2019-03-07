@@ -1,6 +1,15 @@
 #MicroXplorer Configuration settings - do not modify
-CAN.CalculateTimeQuantum=333.3333333333333
-CAN.IPParameters=CalculateTimeQuantum
+ADC.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4
+ADC.ContinuousConvMode=ENABLE
+ADC.IPParameters=ContinuousConvMode,ClockPrescaler,SamplingTime
+ADC.SamplingTime=ADC_SAMPLETIME_239CYCLES_5
+CAN.ABOM=ENABLE
+CAN.AWUM=ENABLE
+CAN.BS1=CAN_BS1_13TQ
+CAN.BS2=CAN_BS2_2TQ
+CAN.CalculateTimeQuantum=125.0
+CAN.IPParameters=CalculateTimeQuantum,Prescaler,BS1,BS2,ABOM,AWUM
+CAN.Prescaler=6
 File.Version=6
 KeepUserPlacement=false
 Mcu.Family=STM32F0
@@ -35,6 +44,7 @@ Mcu.UserConstants=
 Mcu.UserName=STM32F091RBTx
 MxCube.Version=4.27.0
 MxDb.Version=DB.4.0.270
+NVIC.ADC1_COMP_IRQn=true\:0\:0\:false\:false\:true\:true
 NVIC.CEC_CAN_IRQn=true\:0\:0\:false\:false\:true\:true
 NVIC.HardFault_IRQn=true\:0\:0\:false\:false\:true\:false
 NVIC.NonMaskableInt_IRQn=true\:0\:0\:false\:false\:true\:false

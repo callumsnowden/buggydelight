@@ -52,8 +52,41 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-__uint16_t LoopCount = 0;
-__uint16_t vddVoltage = 0;
+volatile uint16_t LoopCount = 0;
+volatile float vddVoltage = 3.26;
+volatile uint16_t ADCRawValues[5] = {0};
+volatile uint8_t ADCChannelIndex = 0;
+
+//Voltage divider ratio calculations
+//Use R2 / (R1 + R2)
+static float _12V_Main_Ratio =  0.15151515151515151515151515151515; //10000 / (56000 + 10000)
+static float _12V_Aux_Ratio = 0.15151515151515151515151515151515; //10000 / (56000 + 10000)
+static float _80V_Ratio = 0.02629016553067185978578383641675; //2700 / (100000 + 2700)
+
+//Voltages
+volatile float Main_12V_Voltage = 0;
+volatile float Aux_12V_Voltage = 0;
+volatile float Input_Voltage = 0;
+
+//Thresholds
+float Voltage_Tolerance = 0.1; //0-1 adjustment (x100 for percent)
+float Input_Lower_Threshold = 39; //Lower input voltage limit
+float Input_Upper_Threshold = 45; //Upper input voltage limit
+
+//Status flags
+volatile uint8_t Main_OK = 0;
+volatile uint8_t Aux_OK = 0;
+volatile uint8_t System_PSU_OK = 0;
+volatile uint8_t CAN_OK = 0;
+volatile uint8_t Input_Fault = 0;
+volatile uint8_t Main_Fault = 0;
+volatile uint8_t Aux_Fault = 0;
+volatile uint8_t System_PSU_Fault = 0;
+volatile uint8_t Fault = 0;
+
+
+//Enable flags
+uint8_t Main_Enable = 0;
 
 /* USER CODE END PV */
 
@@ -102,22 +135,53 @@ int main(void)
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_ADC_Start_IT(&hadc);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  //Check for invalid main output
+	  if((Main_12V_Voltage < (12 - (12 * Voltage_Tolerance)) && Main_Enable == 1) || Main_12V_Voltage > (12 + (12 * Voltage_Tolerance)))
+	  {
+		  Main_Fault = 1;
+		  Main_OK = 0;
+	  } else {
+		 Main_Fault = 0;
+		 Main_OK = 1;
+	  }
+
+	  //Check for out of range input
+	  if(Input_Voltage > Input_Upper_Threshold || Input_Voltage < Input_Lower_Threshold)
+	  {
+		  Input_Fault = 1;
+	  } else if (Input_Voltage < Input_Upper_Threshold || Input_Voltage > Input_Lower_Threshold)
+	  {
+		  Input_Fault = 0;
+	  }
+
+	  //Check for invalid aux output
+	  if(Aux_12V_Voltage < (12 - (12 * Voltage_Tolerance)) || Aux_12V_Voltage > (12 + (12 * Voltage_Tolerance)))
+	  {
+		  Aux_Fault = 1;
+		  Aux_OK = 0;
+	  } else {
+		  Aux_Fault = 0;
+		  Aux_OK = 1;
+	  }
+
+	  if(Aux_Fault || Input_Fault || Main_Fault)
+	  {
+		  Fault = 1;
+	  } else {
+		  Fault = 0;
+	  }
 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-	  HAL_Delay(5000);
-	  HAL_GPIO_WritePin(GPIOA, _12V_MAIN_EN_Pin, GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOC, MAIN_OK_LED_Pin, GPIO_PIN_SET);
-	  HAL_Delay(5000);
-	  HAL_GPIO_WritePin(GPIOA, _12V_MAIN_EN_Pin, GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOC, MAIN_OK_LED_Pin, GPIO_PIN_RESET);
   }
   /* USER CODE END 3 */
 
@@ -135,10 +199,8 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
-  RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -176,12 +238,58 @@ void HAL_SYSTICK_Callback(void)
 {
 	if(LoopCount == 1000) LoopCount = 0;
 
+	//Heartbeat indicator toggle
 	if(LoopCount % 500 == 0)
 	{
-		HAL_GPIO_TogglePin(GPIOA, HEARTBEAT_LED_Pin);
+		HAL_GPIO_TogglePin(HEARTBEAT_LED_GPIO_Port, HEARTBEAT_LED_Pin);
+	}
+
+	//Fault indicators toggle
+	if(LoopCount % 100 == 0)
+	{
+		if(Fault == 1)
+		{
+			HAL_GPIO_TogglePin(FAULT_LED_GPIO_Port, FAULT_LED_Pin);
+
+			if(Main_OK == 0) HAL_GPIO_TogglePin(MAIN_OK_LED_GPIO_Port, MAIN_OK_LED_Pin);
+			if(Aux_OK == 0) HAL_GPIO_TogglePin(AUX_OK_LED_GPIO_Port, AUX_OK_LED_Pin);
+		} else {
+			HAL_GPIO_WritePin(FAULT_LED_GPIO_Port, FAULT_LED_Pin, 0);
+		}
+	}
+
+	//Status indicator setting
+	if(Main_OK == 1)
+	{
+		HAL_GPIO_WritePin(MAIN_OK_LED_GPIO_Port, MAIN_OK_LED_Pin, 0);
+	}
+
+	if(Aux_OK == 1)
+	{
+		HAL_GPIO_WritePin(AUX_OK_LED_GPIO_Port, AUX_OK_LED_Pin, 1);
 	}
 
 	LoopCount++;
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC))
+	{
+		if(ADCChannelIndex == 5) ADCChannelIndex = 0;
+		ADCRawValues[ADCChannelIndex] = HAL_ADC_GetValue(hadc);
+		ADCChannelIndex++;
+	}
+
+	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS) == 1)
+	{
+		//DCBUS_VOLTAGE = (ADC_RAW * (3.3 / 4096.0)) / 0.04347826086956521739130434782609; // calculated from R2 / (R1 + R2)
+		Main_12V_Voltage = (ADCRawValues[0] * (vddVoltage / 4096.0)) / _12V_Main_Ratio;
+		Aux_12V_Voltage = (ADCRawValues[2] * (vddVoltage / 4096.0)) / _12V_Aux_Ratio;
+		Input_Voltage = (ADCRawValues[4] * (vddVoltage / 4096.0)) / _80V_Ratio;
+
+		HAL_ADC_Start_IT(hadc);
+	}
 }
 
 /* USER CODE END 4 */
