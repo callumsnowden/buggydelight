@@ -1,36 +1,36 @@
-﻿Study Static Analysis:1 started: 24/04/2019, 09:58:21
-Number of configurations: 1
-Default mesh: 15337 elements, 32641 nodes
-Solution time 3.7s
-Convergence rate: 50%
-Reached the total number of h refinements 
-Study        Worst Jacobian ratio :  1  on element 1 finished: 24/04/2019, 09:58:39
-Total time 0:00:18
-
-Study Static Analysis:1 started: 24/04/2019, 13:29:58
+﻿Study Static Analysis:1 started: 26/04/2019, 10:35:26
 Number of configurations: 1
 Default mesh: 23319 elements, 47413 nodes
-Solution time 2.6s
+Solution time 3.6s
 Convergence rate: 50%
 Reached the total number of h refinements 
-Study        Worst Jacobian ratio :  1  on element 1 finished: 24/04/2019, 13:30:06
-Total time 0:00:08
+Study        Worst Jacobian ratio :  1  on element 1 finished: 26/04/2019, 10:35:39
+Total time 0:00:13
 
-Study Static Analysis:2 started: 24/04/2019, 13:31:25
+Study Wheel loading front started: 26/04/2019, 13:35:47
 Number of configurations: 1
-Default mesh: 23319 elements, 47413 nodes
-Solution time 2.8s
+Default mesh: 115737 elements, 205844 nodes
+Solution time 17.6s
 Convergence rate: 50%
 Reached the total number of h refinements 
-Study        Worst Jacobian ratio :  1  on element 1 finished: 24/04/2019, 13:31:35
-Total time 0:00:10
+Study        Worst Jacobian ratio :  1  on element 1 finished: 26/04/2019, 13:37:30
+Total time 0:01:43
 
-Study Static Analysis:2 started: 24/04/2019, 16:41:49
+Study Steering kingpin turning load started: 26/04/2019, 15:56:13
 Number of configurations: 1
-Default mesh: 23319 elements, 47413 nodes
-Solution time 3.9s
+Default mesh: 152641 elements, 262257 nodes
+Solution time 31.6s
 Convergence rate: 50%
 Reached the total number of h refinements 
-Study        Worst Jacobian ratio :  1  on element 1 finished: 24/04/2019, 16:42:05
-Total time 0:00:16
+Study        Worst Jacobian ratio :  1  on element 1 finished: 26/04/2019, 15:58:31
+Total time 0:02:18
+
+Study Steering kingpin turning load started: 26/04/2019, 15:59:31
+Number of configurations: 1
+Default mesh: 152641 elements, 262257 nodes
+Solution time 34s
+Convergence rate: 50%
+Reached the total number of h refinements 
+Study Steering kingpin turning load finished: 26/04/2019, 16:00:09
+Total time 0:00:38
 
