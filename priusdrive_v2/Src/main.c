@@ -60,10 +60,11 @@ uint8_t HallPos = 0;
 
 uint8_t step = 0;
 
-uint8_t pwm = 30;
+uint8_t pwm = 170;
 
 #define PWM_INVERTED
 
+/*
 static const uint8_t COMM_TABLE[8][3] = {
 		//U, V, W
 		{0, 0, 0},
@@ -74,6 +75,19 @@ static const uint8_t COMM_TABLE[8][3] = {
 		{1, 0, 0},
 		{1, 0, 1},
 		{1, 1, 1}
+};
+*/
+
+static const uint8_t COMM_TABLE[8][3] = {
+		//U, V, W
+		{0, 0, 0},
+		{1, 0, 0},
+		{1, 1, 0},
+		{0, 1, 0},
+		{0, 1, 1},
+		{0, 0, 1},
+		{1, 0, 1},
+		{0, 0, 0}
 };
 
 /* USER CODE END PV */
@@ -234,7 +248,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/10);
 
     /**Configure the Systick 
     */
@@ -248,6 +262,8 @@ void SystemClock_Config(void)
 
 void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim)
 {
+	DBG_PRINTF("Commutation\r\n");
+
 	//Timer commutation callback
 	if (htim->Instance == TIM1)
 	{
@@ -262,12 +278,17 @@ void UART_putc(void* p, char c)
 
 void HAL_SYSTICK_Callback()
 {
+
 	/*
+	step++;
+
 	if(step == 7)
 	{
 		step = 1;
 	}
+	*/
 
+	/*
 	uint8_t BU = COMM_TABLE[step][0];
 	uint8_t BV = COMM_TABLE[step][1];
 	uint8_t BW = COMM_TABLE[step][2];
@@ -290,28 +311,33 @@ void HAL_SYSTICK_Callback()
 	{
 		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 	}
+	*/
 
-	step++;
+	//step++;
 
+	/*
 	TIM1->CCR1 = pwm;
 	TIM1->CCR2 = pwm;
 	TIM1->CCR3 = pwm;
 	*/
-
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM2)
 	{
-		//DBG_PRINTF("hall timer callback");
+		 HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		//DBG_PRINTF("hall timer callback, step %d\r\n", step);
+
+
+		step++;
 
 		if(step == 7)
 		{
 			step = 1;
 		}
 
-		step++;
+
 	}
 }
 
