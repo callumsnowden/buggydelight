@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/callum.snowden/Documents/GitHub/clasohlsonkart/priusdrive_v2/Inc
+HeaderPath=C:/Users/Callum/Documents/GitHub/clasohlsonkart/priusdrive_v2/Inc
 HeaderFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;gpio.h;adc.h;can.h;tim.h;usart.h;
-SourcePath=C:/Users/callum.snowden/Documents/GitHub/clasohlsonkart/priusdrive_v2/Src
+SourcePath=C:/Users/Callum/Documents/GitHub/clasohlsonkart/priusdrive_v2/Src
 SourceFiles=stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;gpio.c;adc.c;can.c;tim.c;usart.c;
 
 [PreviousLibFiles]
