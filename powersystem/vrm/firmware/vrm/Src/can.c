@@ -44,6 +44,10 @@
 
 /* USER CODE BEGIN 0 */
 
+CanTxMsgTypeDef TxMessage;
+CanRxMsgTypeDef RxMessage;
+CAN_FilterConfTypeDef  sFilterConfig;
+
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -68,6 +72,28 @@ void MX_CAN_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+  hcan.pRxMsg = &RxMessage;
+
+  hcan.pTxMsg = &TxMessage;
+  hcan.pTxMsg->StdId = 0x320;
+  hcan.pTxMsg->ExtId = 0x0;
+  hcan.pTxMsg->RTR = CAN_RTR_DATA;
+  hcan.pTxMsg->IDE = CAN_ID_STD;
+  hcan.pTxMsg->DLC = 0; // this will be set by the code later on
+
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.BankNumber = 14;
+
+  HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 
 }
 
