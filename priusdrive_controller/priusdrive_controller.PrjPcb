@@ -158,6 +158,10 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=LWKAORJO
 
+[GeneratedDocument1]
+DocumentPath=Outputs\Design Rule Check - Priusdrive.html
+DItemRevisionGUID=
+
 [Configuration1]
 Name=Default Configuration
 ParameterCount=0
