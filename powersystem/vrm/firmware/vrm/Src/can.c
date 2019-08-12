@@ -80,7 +80,10 @@ void MX_CAN_Init(void)
   hcan.pTxMsg->ExtId = 0x0;
   hcan.pTxMsg->RTR = CAN_RTR_DATA;
   hcan.pTxMsg->IDE = CAN_ID_STD;
-  hcan.pTxMsg->DLC = 0; // this will be set by the code later on
+  hcan.pTxMsg->DLC = 3; // this will be set by the code later on
+  hcan.pTxMsg->Data[0] = 0;
+  hcan.pTxMsg->Data[1] = 0;
+  hcan.pTxMsg->Data[2] = 0;
 
   sFilterConfig.FilterNumber = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;

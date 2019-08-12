@@ -136,6 +136,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   HAL_ADC_Start_IT(&hadc);
+  //HAL_ADC_Start(&hadc);
+
+  hcan.Instance->MCR = 0x60;
+
+  HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
 
   /* USER CODE END 2 */
 
@@ -256,6 +261,16 @@ void HAL_SYSTICK_Callback(void)
 		} else {
 			HAL_GPIO_WritePin(FAULT_LED_GPIO_Port, FAULT_LED_Pin, 0);
 		}
+
+		hcan.pTxMsg->Data[0] = (int)Main_12V_Voltage;
+		hcan.pTxMsg->Data[1] = (int)Aux_12V_Voltage;
+		hcan.pTxMsg->Data[2] = (int)Input_Voltage;
+
+		if(HAL_CAN_Transmit(&hcan, 10) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
 	}
 
 	//Status indicator setting
@@ -276,19 +291,20 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC))
 	{
-		if(ADCChannelIndex == 5) ADCChannelIndex = 0;
 		ADCRawValues[ADCChannelIndex] = HAL_ADC_GetValue(hadc);
 		ADCChannelIndex++;
 	}
 
-	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS) == 1)
+	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
 	{
+		//ADCChannelIndex = 0;
 		//DCBUS_VOLTAGE = (ADC_RAW * (3.3 / 4096.0)) / 0.04347826086956521739130434782609; // calculated from R2 / (R1 + R2)
 		Main_12V_Voltage = (ADCRawValues[0] * (vddVoltage / 4096.0)) / _12V_Main_Ratio;
 		Aux_12V_Voltage = (ADCRawValues[2] * (vddVoltage / 4096.0)) / _12V_Aux_Ratio;
 		Input_Voltage = (ADCRawValues[4] * (vddVoltage / 4096.0)) / _80V_Ratio;
 
 		HAL_ADC_Start_IT(hadc);
+		ADCChannelIndex = 0;
 	}
 }
 
