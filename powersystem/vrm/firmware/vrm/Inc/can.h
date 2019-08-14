@@ -55,6 +55,8 @@ extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN Private defines */
 
+#define CAN_ADDRESS 0x320
+
 /* USER CODE END Private defines */
 
 extern void _Error_Handler(char *, int);

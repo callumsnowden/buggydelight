@@ -29,7 +29,7 @@ PushECOToAnnotationFile=1
 DItemRevisionGUID=
 ReportSuppressedErrorsInMessages=0
 ForceUpdateCount=0
-OutputPath=
+OutputPath=Outputs
 LogFolderPath=
 ManagedProjectGUID=
 LinkedManagedProjectGUID=
@@ -158,8 +158,105 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=LWKAORJO
 
+[Document8]
+DocumentPath=priusdrive_controller.OutJob
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
 [GeneratedDocument1]
 DocumentPath=Outputs\Design Rule Check - Priusdrive.html
+DItemRevisionGUID=
+
+[GeneratedDocument2]
+DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.DRR
+DItemRevisionGUID=
+
+[GeneratedDocument3]
+DocumentPath=Outputs\Priusdrive.DRR
+DItemRevisionGUID=
+
+[GeneratedDocument4]
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.EXTREP
+DItemRevisionGUID=
+
+[GeneratedDocument5]
+DocumentPath=Outputs\Priusdrive.EXTREP
+DItemRevisionGUID=
+
+[GeneratedDocument6]
+DocumentPath=Outputs\Priusdrive.GBL
+DItemRevisionGUID=
+
+[GeneratedDocument7]
+DocumentPath=Outputs\Priusdrive.GBO
+DItemRevisionGUID=
+
+[GeneratedDocument8]
+DocumentPath=Outputs\Priusdrive.GBS
+DItemRevisionGUID=
+
+[GeneratedDocument9]
+DocumentPath=Outputs\Priusdrive.GKO
+DItemRevisionGUID=
+
+[GeneratedDocument10]
+DocumentPath=Outputs\Priusdrive.GTL
+DItemRevisionGUID=
+
+[GeneratedDocument11]
+DocumentPath=Outputs\Priusdrive.GTO
+DItemRevisionGUID=
+
+[GeneratedDocument12]
+DocumentPath=Outputs\Priusdrive.GTS
+DItemRevisionGUID=
+
+[GeneratedDocument13]
+DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.LDP
+DItemRevisionGUID=
+
+[GeneratedDocument14]
+DocumentPath=Outputs\Priusdrive.LDP
+DItemRevisionGUID=
+
+[GeneratedDocument15]
+DocumentPath=Outputs\Priusdrive.Outline
+DItemRevisionGUID=
+
+[GeneratedDocument16]
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.REP
+DItemRevisionGUID=
+
+[GeneratedDocument17]
+DocumentPath=Outputs\Priusdrive.REP
+DItemRevisionGUID=
+
+[GeneratedDocument18]
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.RUL
+DItemRevisionGUID=
+
+[GeneratedDocument19]
+DocumentPath=Outputs\Priusdrive.RUL
+DItemRevisionGUID=
+
+[GeneratedDocument20]
+DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.TXT
+DItemRevisionGUID=
+
+[GeneratedDocument21]
+DocumentPath=Outputs\Priusdrive.TXT
 DItemRevisionGUID=
 
 [Configuration1]
@@ -170,7 +267,12 @@ ReleaseItemId=
 CurrentRevision=
 Variant=[No Variations]
 GenerateBOM=0
-OutputJobsCount=0
+OutputJobsCount=1
+DocumentReferenceClass1=DocumentReference
+OutputJobFileName1=priusdrive_controller.OutJob
+
+[Generic_EDE]
+OutputDir=Outputs
 
 [OutputGroup1]
 Name=Netlist Outputs
@@ -308,11 +410,12 @@ OutputDocumentPath4=
 OutputVariantName4=[No Variations]
 OutputDefault4=0
 PageOptions4=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
-OutputType5=Gerber
-OutputName5=Gerber Files
+OutputType5=Plane
+OutputName5=Power-Plane Prints
 OutputDocumentPath5=
-OutputVariantName5=[No Variations]
+OutputVariantName5=
 OutputDefault5=0
+PageOptions5=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
 OutputType6=Mask
 OutputName6=Solder/Paste Mask Prints
 OutputDocumentPath6=
@@ -324,17 +427,20 @@ OutputName7=NC Drill Files
 OutputDocumentPath7=
 OutputVariantName7=
 OutputDefault7=0
+Configuration7_Name1=OutputConfigurationParameter1
+Configuration7_Item1=BoardEdgeRoutToolDia=2000000|GenerateBoardEdgeRout=False|GenerateDrilledSlotsG85=False|GenerateEIADrillFile=False|GenerateSeparatePlatedNonPlatedFiles=False|NumberOfDecimals=5|NumberOfUnits=2|OptimizeChangeLocationCommands=True|OriginPosition=Relative|Record=DrillView|Units=Imperial|ZeroesMode=SuppressLeadingZeroes
 OutputType8=ODB
 OutputName8=ODB++ Files
 OutputDocumentPath8=
 OutputVariantName8=[No Variations]
 OutputDefault8=0
-OutputType9=Plane
-OutputName9=Power-Plane Prints
+OutputType9=Gerber
+OutputName9=Gerber Files
 OutputDocumentPath9=
-OutputVariantName9=
+OutputVariantName9=[No Variations]
 OutputDefault9=0
-PageOptions9=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
+Configuration9_Name1=OutputConfigurationParameter1
+Configuration9_Item1=AddToAllLayerClasses.Set= |AddToAllPlots.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|CentrePlots=False|DrillDrawingSymbol=GraphicsSymbol|DrillDrawingSymbolSize=500000|EmbeddedApertures=True|FilmBorderSize=10000000|FilmXSize=200000000|FilmYSize=160000000|FlashAllFills=False|FlashPadShapes=True|G54OnApertureChange=False|GenerateDRCRulesFile=True|GenerateDRCRulesFile=True|GenerateReliefShapes=True|GerberUnit=Imperial|GerberUnit=Imperial|IncludeUnconnectedMidLayerPads=False|LayerClassesMirror.Set= |LayerClassesPlot.Set= |LeadingAndTrailingZeroesMode=SuppressLeadingZeroes|MaxApertureSize=2500000|MinusApertureTolerance=50|MinusApertureTolerance=50|Mirror.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean|MirrorDrillDrawingPlots=False|MirrorDrillGuidePlots=False|NoRegularPolygons=False|NumberOfDecimals=5|NumberOfDecimals=5|OptimizeChangeLocationCommands=True|OptimizeChangeLocationCommands=True|OriginPosition=Relative|Panelize=False|Plot.Set=SerializeLayerHash.Version~2,ClassName~TLayerToBoolean,16973830~1,16973834~1,16777217~1,16842751~1,16973835~1,16973831~1,16908289~1,16973837~1|PlotPositivePlaneLayers=False|PlotUsedDrillDrawingLayerPairs=False|PlotUsedDrillGuideLayerPairs=False|PlusApertureTolerance=50|PlusApertureTolerance=50|Record=GerberView|SoftwareArcs=True|Sorted=False|Sorted=False
 
 [OutputGroup6]
 Name=Report Outputs

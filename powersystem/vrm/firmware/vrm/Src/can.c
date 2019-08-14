@@ -76,15 +76,11 @@ void MX_CAN_Init(void)
   hcan.pRxMsg = &RxMessage;
 
   hcan.pTxMsg = &TxMessage;
-  hcan.pTxMsg->StdId = 0x320;
+  hcan.pTxMsg->StdId = CAN_ADDRESS;
   hcan.pTxMsg->ExtId = 0x0;
   hcan.pTxMsg->RTR = CAN_RTR_DATA;
   hcan.pTxMsg->IDE = CAN_ID_STD;
-  hcan.pTxMsg->DLC = 3; // this will be set by the code later on
-  hcan.pTxMsg->Data[0] = 0;
-  hcan.pTxMsg->Data[1] = 0;
-  hcan.pTxMsg->Data[2] = 0;
-
+  hcan.pTxMsg->DLC = 0; // this will be set by the code later on
   sFilterConfig.FilterNumber = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;

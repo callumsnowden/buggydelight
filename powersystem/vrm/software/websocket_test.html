@@ -1,0 +1,24 @@
+<html>
+<head>
+	<title>Websocket test client</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" integrity="sha256-qSIshlknROr4J8GMHRlW3fGKrPki733tLq+qeMCR05Q=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" integrity="sha256-IvM9nJf/b5l2RoebiFno92E5ONttVyaEEsdemDC6iQA=" crossorigin="anonymous" />
+</head>
+<body>
+	<h1>Websocket test</h1>
+	<hr>
+	<div id="websocket_content">
+		<canvas id="chart" width="600" height="400"></canvas>
+	</div>
+</body>
+<script type="text/javascript">
+	const connection = new WebSocket("ws://localhost:5678")
+	connection.onopen = () => {
+		alert("Websocket opened")
+	}
+
+	connection.onmessage = e => {
+		console.log(e.data)
+	}
+</script>
+</html>

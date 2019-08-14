@@ -54,6 +54,14 @@
 
 volatile uint16_t LoopCount = 0;
 volatile float vddVoltage = 3.26;
+/*
+ * ADC Channels
+ * 0: 12V Main voltage
+ * 1: 12V Main current
+ * 2: 12V Aux voltage
+ * 3: 12V Aux current
+ * 4: 80V Main input voltage
+ */
 volatile uint16_t ADCRawValues[5] = {0};
 volatile uint8_t ADCChannelIndex = 0;
 
@@ -67,10 +75,12 @@ static float _80V_Ratio = 0.02629016553067185978578383641675; //2700 / (100000 +
 volatile float Main_12V_Voltage = 0;
 volatile float Aux_12V_Voltage = 0;
 volatile float Input_Voltage = 0;
+volatile float Main_12V_Current = 0;
+volatile float Aux_12V_Current = 0;
 
 //Thresholds
 float Voltage_Tolerance = 0.1; //0-1 adjustment (x100 for percent)
-float Input_Lower_Threshold = 39; //Lower input voltage limit
+float Input_Lower_Threshold = 34; //Lower input voltage limit
 float Input_Upper_Threshold = 45; //Upper input voltage limit
 
 //Status flags
@@ -84,9 +94,24 @@ volatile uint8_t Aux_Fault = 0;
 volatile uint8_t System_PSU_Fault = 0;
 volatile uint8_t Fault = 0;
 
+/*
+ * Fault code indicator
+ * Bit 7:
+ * Bit 6:
+ * Bit 5:
+ * Bit 4:
+ * Bit 3:
+ * Bit 2: Input_Fault
+ * Bit 1: Aux_Fault
+ * Bit 0: Main_Fault
+ */
+volatile uint8_t Fault_Code = 0;
 
 //Enable flags
 uint8_t Main_Enable = 0;
+
+#define BIT_SET(a,b) ((a) |= (1ULL<<(b)))
+#define BIT_CLEAR(a,b) ((a) &= ~(1ULL<<(b)))
 
 /* USER CODE END PV */
 
@@ -96,9 +121,23 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
+float CalculateShuntCurrent(uint32_t ADC_Reading);
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+float CalculateShuntCurrent(uint32_t ADC_Reading)
+{
+	//Calculate ADC pin input voltage
+	volatile float ADC_InputVoltage = ADC_Reading * (vddVoltage / 4096.0);
+
+	volatile float CurrentShuntVoltage = ADC_InputVoltage / 50.0;
+
+	volatile float Current = CurrentShuntVoltage / 0.005;
+
+	return Current;
+}
 
 /* USER CODE END 0 */
 
@@ -153,28 +192,34 @@ int main(void)
 	  {
 		  Main_Fault = 1;
 		  Main_OK = 0;
+		  BIT_SET(Fault_Code, 0);
 	  } else {
 		 Main_Fault = 0;
 		 Main_OK = 1;
+		 BIT_CLEAR(Fault_Code, 0);
 	  }
 
 	  //Check for out of range input
 	  if(Input_Voltage > Input_Upper_Threshold || Input_Voltage < Input_Lower_Threshold)
 	  {
 		  Input_Fault = 1;
+		  BIT_SET(Fault_Code, 2);
 	  } else if (Input_Voltage < Input_Upper_Threshold || Input_Voltage > Input_Lower_Threshold)
 	  {
 		  Input_Fault = 0;
+		  BIT_CLEAR(Fault_Code, 2);
 	  }
 
-	  //Check for invalid aux output
+	  //Check for invalid auxiliary 12V output voltage
 	  if(Aux_12V_Voltage < (12 - (12 * Voltage_Tolerance)) || Aux_12V_Voltage > (12 + (12 * Voltage_Tolerance)))
 	  {
 		  Aux_Fault = 1;
 		  Aux_OK = 0;
+		  BIT_SET(Fault_Code, 1);
 	  } else {
 		  Aux_Fault = 0;
 		  Aux_OK = 1;
+		  BIT_CLEAR(Fault_Code, 1);
 	  }
 
 	  if(Aux_Fault || Input_Fault || Main_Fault)
@@ -249,7 +294,7 @@ void HAL_SYSTICK_Callback(void)
 		HAL_GPIO_TogglePin(HEARTBEAT_LED_GPIO_Port, HEARTBEAT_LED_Pin);
 	}
 
-	//Fault indicators toggle
+	//Fault indicators toggle & CAN transmit
 	if(LoopCount % 100 == 0)
 	{
 		if(Fault == 1)
@@ -262,19 +307,30 @@ void HAL_SYSTICK_Callback(void)
 			HAL_GPIO_WritePin(FAULT_LED_GPIO_Port, FAULT_LED_Pin, 0);
 		}
 
+		hcan.pTxMsg->DLC = 6;
 		hcan.pTxMsg->Data[0] = (int)Main_12V_Voltage;
-		hcan.pTxMsg->Data[1] = (int)Aux_12V_Voltage;
-		hcan.pTxMsg->Data[2] = (int)Input_Voltage;
+		hcan.pTxMsg->Data[1] = (int)Main_12V_Current;
+		hcan.pTxMsg->Data[2] = (int)Aux_12V_Voltage;
+		hcan.pTxMsg->Data[3] = (int)Aux_12V_Current;
+		hcan.pTxMsg->Data[4] = (int)Input_Voltage;
+		hcan.pTxMsg->Data[5] = (int)Fault_Code;
 
 		if(HAL_CAN_Transmit(&hcan, 10) != HAL_OK)
 		{
 			Error_Handler();
+		} else {
+			HAL_GPIO_TogglePin(CAN_LED_GPIO_Port, CAN_LED_Pin);
 		}
 
 	}
 
 	//Status indicator setting
-	if(Main_OK == 1)
+	if(Main_OK == 1 && Main_Enable == 1)
+	{
+		HAL_GPIO_WritePin(MAIN_OK_LED_GPIO_Port, MAIN_OK_LED_Pin, 1);
+	}
+
+	if(Main_Enable == 0)
 	{
 		HAL_GPIO_WritePin(MAIN_OK_LED_GPIO_Port, MAIN_OK_LED_Pin, 0);
 	}
@@ -297,15 +353,44 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 	if(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
 	{
-		//ADCChannelIndex = 0;
 		//DCBUS_VOLTAGE = (ADC_RAW * (3.3 / 4096.0)) / 0.04347826086956521739130434782609; // calculated from R2 / (R1 + R2)
+
+		//Calculate voltages and currents
 		Main_12V_Voltage = (ADCRawValues[0] * (vddVoltage / 4096.0)) / _12V_Main_Ratio;
+		Main_12V_Current = CalculateShuntCurrent(ADCRawValues[1]);
 		Aux_12V_Voltage = (ADCRawValues[2] * (vddVoltage / 4096.0)) / _12V_Aux_Ratio;
+		Aux_12V_Current = CalculateShuntCurrent(ADCRawValues[3]);
 		Input_Voltage = (ADCRawValues[4] * (vddVoltage / 4096.0)) / _80V_Ratio;
 
 		HAL_ADC_Start_IT(hadc);
 		ADCChannelIndex = 0;
 	}
+}
+
+void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
+{
+	HAL_GPIO_TogglePin(CAN_LED_GPIO_Port, CAN_LED_Pin);
+}
+
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
+{
+	HAL_GPIO_TogglePin(CAN_LED_GPIO_Port, CAN_LED_Pin);
+
+	if(hcan->pRxMsg->StdId == CAN_ADDRESS && hcan->pRxMsg->IDE == CAN_ID_STD)
+	{
+		if(hcan->pRxMsg->Data[0] == 1)
+		{
+			Main_Enable = 1;
+			HAL_GPIO_WritePin(_12V_MAIN_EN_GPIO_Port,_12V_MAIN_EN_Pin, 1);
+		}
+		if(hcan->pRxMsg->Data[0] == 0)
+		{
+			Main_Enable = 0;
+			HAL_GPIO_WritePin(_12V_MAIN_EN_GPIO_Port,_12V_MAIN_EN_Pin, 0);
+		}
+	}
+
+	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 
 /* USER CODE END 4 */
