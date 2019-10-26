@@ -64,7 +64,7 @@ Used DCodes :
     D31
     D32
     D34
-    D37
+    D35
     D41
     D42
     D43
@@ -82,9 +82,9 @@ Generating : Top Overlay
 
 
 Used DCodes :
-    D30
-    D31
+    D32
     D33
+    D34
     D48
     D49
     D50
@@ -106,7 +106,7 @@ Generating : Top Solder
 
 
 Used DCodes :
-    D28
+    D18
     D55
     D56
     D57

@@ -176,7 +176,7 @@ GenerateClassCluster=0
 DocumentUniqueId=
 
 [GeneratedDocument1]
-DocumentPath=Outputs\Design Rule Check - Priusdrive.html
+DocumentPath=Default Configuration\Outputs\BOM\BOM_PartType-priusdrive_controller.xlsx
 DItemRevisionGUID=
 
 [GeneratedDocument2]
@@ -184,79 +184,55 @@ DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.DRR
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Outputs\Priusdrive.DRR
-DItemRevisionGUID=
-
-[GeneratedDocument4]
 DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.EXTREP
 DItemRevisionGUID=
 
+[GeneratedDocument4]
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GBL
+DItemRevisionGUID=
+
 [GeneratedDocument5]
-DocumentPath=Outputs\Priusdrive.EXTREP
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GBO
 DItemRevisionGUID=
 
 [GeneratedDocument6]
-DocumentPath=Outputs\Priusdrive.GBL
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GBS
 DItemRevisionGUID=
 
 [GeneratedDocument7]
-DocumentPath=Outputs\Priusdrive.GBO
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GKO
 DItemRevisionGUID=
 
 [GeneratedDocument8]
-DocumentPath=Outputs\Priusdrive.GBS
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GTL
 DItemRevisionGUID=
 
 [GeneratedDocument9]
-DocumentPath=Outputs\Priusdrive.GKO
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GTO
 DItemRevisionGUID=
 
 [GeneratedDocument10]
-DocumentPath=Outputs\Priusdrive.GTL
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.GTS
 DItemRevisionGUID=
 
 [GeneratedDocument11]
-DocumentPath=Outputs\Priusdrive.GTO
-DItemRevisionGUID=
-
-[GeneratedDocument12]
-DocumentPath=Outputs\Priusdrive.GTS
-DItemRevisionGUID=
-
-[GeneratedDocument13]
 DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.LDP
 DItemRevisionGUID=
 
-[GeneratedDocument14]
-DocumentPath=Outputs\Priusdrive.LDP
+[GeneratedDocument12]
+DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.Outline
 DItemRevisionGUID=
 
-[GeneratedDocument15]
-DocumentPath=Outputs\Priusdrive.Outline
-DItemRevisionGUID=
-
-[GeneratedDocument16]
+[GeneratedDocument13]
 DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.REP
 DItemRevisionGUID=
 
-[GeneratedDocument17]
-DocumentPath=Outputs\Priusdrive.REP
-DItemRevisionGUID=
-
-[GeneratedDocument18]
+[GeneratedDocument14]
 DocumentPath=Default Configuration\Outputs\Gerber\Priusdrive.RUL
 DItemRevisionGUID=
 
-[GeneratedDocument19]
-DocumentPath=Outputs\Priusdrive.RUL
-DItemRevisionGUID=
-
-[GeneratedDocument20]
+[GeneratedDocument15]
 DocumentPath=Default Configuration\Outputs\NC Drill\Priusdrive.TXT
-DItemRevisionGUID=
-
-[GeneratedDocument21]
-DocumentPath=Outputs\Priusdrive.TXT
 DItemRevisionGUID=
 
 [Configuration1]
@@ -288,7 +264,7 @@ OutputDefault1=0
 [OutputGroup2]
 Name=Simulator Outputs
 Description=
-TargetPrinter=Microsoft Print to PDF
+TargetPrinter=Canon MX510 series Printer WS
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintWhat=1
 
 [OutputGroup3]

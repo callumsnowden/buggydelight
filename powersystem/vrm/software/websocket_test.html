@@ -1,24 +1,160 @@
 <html>
 <head>
 	<title>Websocket test client</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" integrity="sha256-qSIshlknROr4J8GMHRlW3fGKrPki733tLq+qeMCR05Q=" crossorigin="anonymous"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" integrity="sha256-IvM9nJf/b5l2RoebiFno92E5ONttVyaEEsdemDC6iQA=" crossorigin="anonymous" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.min.js" integrity="sha256-w8BXa9KXx+nmhO9N4hupvlLy+cAtqEarnB40DVJx2xA=" crossorigin="anonymous"></script>
 </head>
 <body>
 	<h1>Websocket test</h1>
 	<hr>
-	<div id="websocket_content">
-		<canvas id="chart" width="600" height="400"></canvas>
+	<div style="display: flex; flex-direction:row; justify-content: space-around;">
+		<div style="display: flex; flex-direction: column; width: 50%;">
+			<canvas id="voltageChart"></canvas>
+		</div>
+		<div style="display: flex; flex-direction: column; width: 50%">
+			<canvas id="currentChart"></canvas>
+		</div>
+	</div>
+	<div style="display: flex; flex-direction:row; justify-content: space-around;">
+		<div style="display: flex; flex-direction: column; width: 50%;">
+			<button onclick="sendOn()">Main on</button>
+			<button onclick="sendOff()">Main off</button>
+		</div>
 	</div>
 </body>
 <script type="text/javascript">
-	const connection = new WebSocket("ws://localhost:5678")
+	function sendOn() {
+		connection.send("on");
+	}
+
+	function sendOff() {
+		connection.send("off");
+	}
+
+	var message = 0;
+	var voltageCanvas = document.getElementById('voltageChart');
+	var currentCanvas = document.getElementById('currentChart');
+	const connection = new WebSocket("ws://localhost:5678");
+
+	var voltageChart = new Chart(voltageCanvas, {
+		type: 'line',
+		data: {
+			labels: [],
+			datasets: [{
+				data: [],
+				label: "Input voltage",
+				borderColor: "#f57542",
+				fill: false
+			}, {
+				data: [],
+				label: "Main output voltage",
+				borderColor: "#42f593",
+				fill: false
+			}, {
+				data: [],
+				label: "Aux output voltage",
+				borderColor: "#7242f5",
+				fill: false
+			}
+			]
+		},
+		options: {
+			responsive: true,
+        	scales: {
+            	yAxes: [{
+                	ticks: {
+                   		min: 0,
+                    	max: 60
+                	}
+            	}]
+        	}
+    	}
+	});
+
+	var currentChart = new Chart(currentCanvas, {
+		type: 'line',
+		data: {
+			labels: [],
+			datasets: [{
+				data: [],
+				label: "Main output current",
+				borderColor: "#42f593",
+				fill: false
+			}, {
+				data: [],
+				label: "Aux output current",
+				borderColor: "#7242f5",
+				fill: false
+			}
+			]
+		},
+		options: {
+			responsive: true,
+        	scales: {
+            	yAxes: [{
+                	ticks: {
+                   		min: 0,
+                    	max: 8
+                	}
+            	}]
+        	}
+    	}
+	});
+
 	connection.onopen = () => {
-		alert("Websocket opened")
+		//alert("Websocket opened")
 	}
 
 	connection.onmessage = e => {
-		console.log(e.data)
+		var json = JSON.parse(e.data);
+
+		//chart.data.labels.push(message++);
+		message++;
+		//if (message % 10 == 0) {
+
+			var dataArray = [
+				json["input_voltage"],
+				json["main_voltage"],
+				json["aux_voltage"]
+			];
+
+			if(message > 40) {
+				voltageChart.data.labels.splice(0, 1); // remove first label
+				voltageChart.data.datasets[0].data.splice(0, 1); // remove first data point
+				voltageChart.data.datasets[1].data.splice(0, 1); // remove first data point
+				voltageChart.data.datasets[2].data.splice(0, 1); // remove first data point
+
+				currentChart.data.labels.splice(0, 1); // remove first label
+				currentChart.data.datasets[0].data.splice(0, 1); // remove first data point
+				currentChart.data.datasets[1].data.splice(0, 1); // remove first data point
+			}
+
+			voltageChart.data.labels.push(message);
+			voltageChart.data.datasets[0].data.push(json["input_voltage"]);
+			voltageChart.data.datasets[1].data.push(json["main_voltage"]);
+			voltageChart.data.datasets[2].data.push(json["aux_voltage"]);
+			voltageChart.update();
+
+			currentChart.data.labels.push(message);
+			currentChart.data.datasets[0].data.push(json["main_current"]);
+			currentChart.data.datasets[1].data.push(json["aux_current"]);
+			currentChart.update();
+
+			//addData(lineChart, message, dataArray);
+			console.log(e.data)
+		//}
+		
+
+		/*
+		chart.data.datasets.forEach((dataset) => {
+        	dataset.data.push(dataArray);
+    	});
+    	*/
+    	/*
+    	chart.addData(dataArray);
+    	chart.update();
+    	*/
+
+		
 	}
 </script>
 </html>

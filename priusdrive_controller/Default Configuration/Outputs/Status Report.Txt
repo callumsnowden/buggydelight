@@ -1,16 +1,14 @@
 Project Outputs Generation Report
 ---------------------------------
-Start Output Generation At 10:04:19 On 03/07/2019
+Start Output Generation At 11:17:44 On 02/09/2019
 
-Output: NC Drill
-Type  : NC Drill
-From  : PCB Document [Priusdrive.CSPcbDoc]
-   Generated File[Priusdrive.TXT]
-   Generated File[Priusdrive.LDP]
-   Generated File[Priusdrive.DRR]
+Output: BOM_PartType
+Type  : BOM
+From  : Variant [[No Variations]] of Project [priusdrive_controller.PrjPcb]
+   Generated File[BOM_PartType-priusdrive_controller.xlsx]
 
 
-Files Generated   : 3
+Files Generated   : 1
 Documents Printed : 0
 
-Finished Output Generation At 10:04:19 On 03/07/2019
+Finished Output Generation At 11:18:00 On 02/09/2019

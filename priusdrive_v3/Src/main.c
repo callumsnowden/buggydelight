@@ -20,6 +20,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "can.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -37,6 +39,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+int8_t PWM = 0;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,19 +52,9 @@
 
 /* USER CODE BEGIN PV */
 
-static const uint8_t COMM_TABLE[6][3] = {
-		//U, V, W
-		{0, 0, 1},
-		{0, 1, 1},
-		{0, 1, 0},
-		{1, 1, 0},
-		{1, 0, 0},
-		{1, 0, 1}
-};
+uint8_t sineTable[3][360] = {{50,51,52,53,53,54,55,56,57,58,59,60,60,61,62,63,64,65,65,66,67,68,69,70,70,71,72,73,73,74,75,76,76,77,78,79,79,80,81,81,82,83,83,84,85,85,86,87,87,88,88,89,89,90,90,91,91,92,92,93,93,94,94,95,95,95,96,96,96,97,97,97,98,98,98,98,99,99,99,99,99,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,99,99,99,99,99,99,98,98,98,98,97,97,97,96,96,96,95,95,95,94,94,93,93,92,92,91,91,90,90,89,89,88,88,87,87,86,85,85,84,83,83,82,81,81,80,79,79,78,77,76,76,75,74,73,73,72,71,70,70,69,68,67,66,65,65,64,63,62,61,60,60,59,58,57,56,55,54,53,53,52,51,50,49,48,47,47,46,45,44,43,42,41,40,40,39,38,37,36,35,35,34,33,32,31,30,30,29,28,27,27,26,25,24,24,23,22,21,21,20,19,19,18,17,17,16,15,15,14,13,13,12,12,11,11,10,10,9,9,8,8,7,7,6,6,5,5,5,4,4,4,3,3,3,2,2,2,2,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,15,15,16,17,17,18,19,19,20,21,21,22,23,24,24,25,26,27,27,28,29,30,30,31,32,33,34,35,35,36,37,38,39,40,40,41,42,43,44,45,46,47,47,48,49}, {6,6,5,5,5,4,4,4,3,3,3,2,2,2,2,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,15,15,16,17,17,18,19,19,20,21,21,22,23,24,24,25,26,27,27,28,29,30,30,31,32,33,34,35,35,36,37,38,39,40,40,41,42,43,44,45,46,47,47,48,49,50,51,52,53,53,54,55,56,57,58,59,60,60,61,62,63,64,65,65,66,67,68,69,70,70,71,72,73,73,74,75,76,76,77,78,79,79,80,81,81,82,83,83,84,85,85,86,87,87,88,88,89,89,90,90,91,91,92,92,93,93,94,94,95,95,95,96,96,96,97,97,97,98,98,98,98,99,99,99,99,99,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,99,99,99,99,99,99,98,98,98,98,97,97,97,96,96,96,95,95,95,94,94,93,93,92,92,91,91,90,90,89,89,88,88,87,87,86,85,85,84,83,83,82,81,81,80,79,79,78,77,76,76,75,74,73,73,72,71,70,70,69,68,67,66,65,65,64,63,62,61,60,60,59,58,57,56,55,54,53,53,52,51,50,49,48,47,47,46,45,44,43,42,41,40,40,39,38,37,36,35,35,34,33,32,31,30,30,29,28,27,27,26,25,24,24,23,22,21,21,20,19,19,18,17,17,16,15,15,14,13,13,12,12,11,11,10,10,9,9,8,8,7,7}, {93,92,92,91,91,90,90,89,89,88,88,87,87,86,85,85,84,83,83,82,81,81,80,79,79,78,77,76,76,75,74,73,73,72,71,70,70,69,68,67,66,65,65,64,63,62,61,60,60,59,58,57,56,55,54,53,53,52,51,50,49,48,47,47,46,45,44,43,42,41,40,40,39,38,37,36,35,35,34,33,32,31,30,30,29,28,27,27,26,25,24,24,23,22,21,21,20,19,19,18,17,17,16,15,15,14,13,13,12,12,11,11,10,10,9,9,8,8,7,7,6,6,5,5,5,4,4,4,3,3,3,2,2,2,2,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,15,15,16,17,17,18,19,19,20,21,21,22,23,24,24,25,26,27,27,28,29,30,30,31,32,33,34,35,35,36,37,38,39,40,40,41,42,43,44,45,46,47,47,48,49,50,51,52,53,53,54,55,56,57,58,59,60,60,61,62,63,64,65,65,66,67,68,69,70,70,71,72,73,73,74,75,76,76,77,78,79,79,80,81,81,82,83,83,84,85,85,86,87,87,88,88,89,89,90,90,91,91,92,92,93,93,94,94,95,95,95,96,96,96,97,97,97,98,98,98,98,99,99,99,99,99,99,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,99,99,99,99,99,99,98,98,98,98,97,97,97,96,96,96,95,95,95,94,94,93}};
 
-uint8_t PWM = 60;
-
-volatile uint8_t step = 0;
+uint16_t sinePos = 0;
 
 /* USER CODE END PV */
 
@@ -108,22 +102,32 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART2_UART_Init();
+  MX_ADC1_Init();
+  MX_CAN_Init();
+  MX_TIM3_Init();
+  MX_TIM4_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
 
-  TIM1->CCR1 = PWM;
-  TIM1->CCR2 = PWM;
-  TIM1->CCR3 = PWM;
+  /*
+   * TIM_CHANNEL_1 / CCR1 is U
+   * TIM_CHANNEL_2 / CCR2 is V
+   * TIM_CHANNEL_3 / CCR3 is W
+   */
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 
-  HAL_TIMEx_HallSensor_Start(&htim2);
-  HAL_TIMEx_ConfigCommutationEvent_IT(&htim1, TIM_TS_ITR0, TIM_COMMUTATION_TRGI);
+  HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO_Port, MOTOR_ENABLE_Pin, GPIO_PIN_SET);
 
+  TIM1->CCR1 = 50;
+  TIM1->CCR2 = 50;
+  TIM1->CCR3 = 50;
+
+  PWM = 0;
 
   /* USER CODE END 2 */
 
@@ -134,9 +138,41 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  /*
+	  if(sinePos > 359) sinePos = 0;
+	  TIM1->CCR1 = sineTable[0][sinePos];
+	  TIM1->CCR2 = sineTable[1][sinePos];
+	  TIM1->CCR3 = sineTable[2][sinePos];
+	  sinePos++;
+	  HAL_Delay(20);
+	  */
 
-	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	//HAL_Delay(500);
+	  for(int8_t i = 0; i < 5; i++)
+	  {
+		  PWM += 10;
+		  TIM1->CCR2 = 50 + PWM;
+		  TIM1->CCR3 = 50 - PWM;
+		  HAL_Delay(100);
+	  }
+	  HAL_Delay(2000);
+	  for(int8_t i = 0; i < 10; i++)
+	  {
+		  PWM -= 10;
+	  	  TIM1->CCR2 = 50 + PWM;
+	  	  TIM1->CCR3 = 50 - PWM;
+	  	  HAL_Delay(100);
+	  }
+	  HAL_Delay(2000);
+	  for(int8_t i = 0; i < 5; i++)
+	  {
+		  PWM += 10;
+		  TIM1->CCR2 = 50 + PWM;
+		  TIM1->CCR3 = 50 - PWM;
+		  HAL_Delay(100);
+	  }
+	  HAL_Delay(2000);
+
+
   }
   /* USER CODE END 3 */
 }
@@ -149,6 +185,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -175,6 +212,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
@@ -189,43 +232,6 @@ static void MX_NVIC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void HAL_TIMEx_CommutationCallback(TIM_HandleTypeDef *htim)
-{
-	if(htim->Instance == TIM1)
-	{
-		//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-
-		step++;
-		if (step == 6) step = 0;
-
-		uint8_t BU = COMM_TABLE[step][0];
-		uint8_t BV = COMM_TABLE[step][1];
-		uint8_t BW = COMM_TABLE[step][2];
-
-		if(!BU) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-		if(!BV) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-		if(!BW) HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-
-		if(BU) HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-
-		if(BV) HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-
-		if(BW) HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-
-		TIM1->CCR1 = PWM;
-		TIM1->CCR2 = PWM;
-		TIM1->CCR3 = PWM;
-	}
-}
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-{
-	if(htim->Instance == TIM2)
-	{
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	}
-}
 
 /* USER CODE END 4 */
 

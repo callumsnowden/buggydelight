@@ -309,9 +309,9 @@ void HAL_SYSTICK_Callback(void)
 
 		hcan.pTxMsg->DLC = 6;
 		hcan.pTxMsg->Data[0] = (int)Main_12V_Voltage;
-		hcan.pTxMsg->Data[1] = (int)Main_12V_Current;
+		hcan.pTxMsg->Data[1] = (int)Main_12V_Current * 10;
 		hcan.pTxMsg->Data[2] = (int)Aux_12V_Voltage;
-		hcan.pTxMsg->Data[3] = (int)Aux_12V_Current;
+		hcan.pTxMsg->Data[3] = (int)Aux_12V_Current * 10;
 		hcan.pTxMsg->Data[4] = (int)Input_Voltage;
 		hcan.pTxMsg->Data[5] = (int)Fault_Code;
 
