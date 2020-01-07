@@ -22,6 +22,10 @@
 
 /* USER CODE BEGIN 0 */
 
+CanTxMsgTypeDef TxMessage;
+CanRxMsgTypeDef RxMessage;
+CAN_FilterConfTypeDef  sFilterConfig;
+
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -31,21 +35,42 @@ void MX_CAN_Init(void)
 {
 
   hcan.Instance = CAN1;
-  hcan.Init.Prescaler = 6;
+  hcan.Init.Prescaler = 4;
   hcan.Init.Mode = CAN_MODE_NORMAL;
-  hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
-  hcan.Init.TimeTriggeredMode = DISABLE;
-  hcan.Init.AutoBusOff = ENABLE;
-  hcan.Init.AutoWakeUp = ENABLE;
-  hcan.Init.AutoRetransmission = DISABLE;
-  hcan.Init.ReceiveFifoLocked = DISABLE;
-  hcan.Init.TransmitFifoPriority = DISABLE;
+    hcan.Init.SJW = CAN_SJW_1TQ;
+    hcan.Init.BS1 = CAN_BS1_13TQ;
+    hcan.Init.BS2 = CAN_BS2_2TQ;
+    hcan.Init.TTCM = DISABLE;
+    hcan.Init.ABOM = ENABLE;
+    hcan.Init.AWUM = ENABLE;
+    hcan.Init.NART = DISABLE;
+    hcan.Init.RFLM = DISABLE;
+    hcan.Init.TXFP = DISABLE;
   if (HAL_CAN_Init(&hcan) != HAL_OK)
   {
     Error_Handler();
   }
+
+  hcan.pRxMsg = &RxMessage;
+
+    hcan.pTxMsg = &TxMessage;
+    hcan.pTxMsg->StdId = 0x01;
+    hcan.pTxMsg->ExtId = 0x0;
+    hcan.pTxMsg->RTR = CAN_RTR_DATA;
+    hcan.pTxMsg->IDE = CAN_ID_STD;
+    hcan.pTxMsg->DLC = 0; // this will be set by the code later on
+    sFilterConfig.FilterNumber = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = 0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.BankNumber = 14;
+
+    HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 
 }
 
@@ -79,6 +104,8 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     /* CAN1 interrupt Init */
     HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -104,6 +131,7 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
     /* CAN1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN1_RX1_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */

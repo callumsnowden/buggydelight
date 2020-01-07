@@ -1,0 +1,12 @@
+Added Component: Designator=U10(SOP8)
+Added Pin To Net: NetName=GND Pin=C14-1
+Added Pin To Net: NetName=+3V3 Pin=C14-2
+Added Pin To Net: NetName=FLASH_SS Pin=U10-1
+Added Pin To Net: NetName=FLASH_MISO Pin=U10-2
+Added Pin To Net: NetName=+3V3 Pin=U10-3
+Added Pin To Net: NetName=GND Pin=U10-4
+Added Pin To Net: NetName=FLASH_MOSI Pin=U10-5
+Added Pin To Net: NetName=FLASH_SCK Pin=U10-6
+Added Pin To Net: NetName=+3V3 Pin=U10-7
+Added Pin To Net: NetName=+3V3 Pin=U10-8
+Added Member To Class: ClassName=Microcontroller Member=Component U10 M95640-WMN6TP

@@ -1,0 +1,81 @@
+Removed Pin From Net: NetName=NetP5_1 Pin=TP3-1
+Removed Member From Class: ClassName=Connectors Member=TP3
+Added Component: Designator=R36(RESC0603(1608)_N)
+Added Component: Designator=R37(RESC0603(1608)_N)
+Added Pin To Net: NetName=DC_LINK_VOLTAGE Pin=R36-1
+Added Pin To Net: NetName=NetP5_1 Pin=R36-2
+Added Pin To Net: NetName=DC_LINK_VOLTAGE Pin=R37-1
+Added Pin To Net: NetName=GND Pin=R37-2
+Change Net Name : Old Net Name=12V_RAW New Net Name=NetP3_3
+Change Net Name : Old Net Name=BOOST_ENABLE New Net Name=NetU4_1
+Change Net Name : Old Net Name=BOOST_FAIL New Net Name=NetR14_2
+Change Net Name : Old Net Name=BOOST_PWM New Net Name=NetU4_3
+Change Net Name : Old Net Name=BRAKE New Net Name=NetP8_2
+Change Net Name : Old Net Name=BRAKE_IN New Net Name=NetR15_1
+Change Net Name : Old Net Name=CAN_H New Net Name=NetP1_1
+Change Net Name : Old Net Name=CAN_L New Net Name=NetP3_2
+Change Net Name : Old Net Name=CAN_RX New Net Name=NetU1_4
+Change Net Name : Old Net Name=CAN_TX New Net Name=NetU1_1
+Change Net Name : Old Net Name=CONTROL_CURRENT_SENSE New Net Name=NetC23_1
+Change Net Name : Old Net Name=COOLANT_IN_TEMP New Net Name=NetC3_1
+Change Net Name : Old Net Name=COOLANT_OUT_TEMP New Net Name=NetC5_1
+Change Net Name : Old Net Name=CPWM New Net Name=NetP5_4
+Change Net Name : Old Net Name=CSDN New Net Name=NetP5_5
+Change Net Name : Old Net Name=DC_LINK_VOLTAGE New Net Name=NetR36_1
+Change Net Name : Old Net Name=DIAG_LED_0 New Net Name=NetQ5_2
+Change Net Name : Old Net Name=DIAG_LED_1 New Net Name=NetQ5_5
+Change Net Name : Old Net Name=DRIVE_TEMPERATURE New Net Name=NetC2_1
+Change Net Name : Old Net Name=ESTOP New Net Name=NetP8_1
+Change Net Name : Old Net Name=ESTOP_IN New Net Name=NetR9_1
+Change Net Name : Old Net Name=FAN_GROUND New Net Name=NetP9_4
+Change Net Name : Old Net Name=FAN_PWM New Net Name=NetU4_9
+Change Net Name : Old Net Name=FAULT New Net Name=NetP11_2
+Change Net Name : Old Net Name=FAULT_OUT New Net Name=NetQ3_1
+Change Net Name : Old Net Name=FCV New Net Name=NetP5_2
+Change Net Name : Old Net Name=FLASH_MISO New Net Name=NetU5_56
+Change Net Name : Old Net Name=FLASH_MOSI New Net Name=NetU5_57
+Change Net Name : Old Net Name=FLASH_SCK New Net Name=NetU5_55
+Change Net Name : Old Net Name=FLASH_SS New Net Name=NetU5_50
+Change Net Name : Old Net Name=GPIO_0 New Net Name=NetP2_1
+Change Net Name : Old Net Name=GPIO_1 New Net Name=NetP2_2
+Change Net Name : Old Net Name=GPIO_2 New Net Name=NetP2_3
+Change Net Name : Old Net Name=GPIO_3 New Net Name=NetP2_4
+Change Net Name : Old Net Name=GPIO_4 New Net Name=NetP2_5
+Change Net Name : Old Net Name=GPIO_5 New Net Name=NetP2_6
+Change Net Name : Old Net Name=GPIO_6 New Net Name=NetP2_8
+Change Net Name : Old Net Name=GPIO_7 New Net Name=NetP2_9
+Change Net Name : Old Net Name=GPIO_8 New Net Name=NetP2_10
+Change Net Name : Old Net Name=GPIO_9 New Net Name=NetP2_11
+Change Net Name : Old Net Name=GPIO_10 New Net Name=NetP2_12
+Change Net Name : Old Net Name=HALL_U New Net Name=NetC11_2
+Change Net Name : Old Net Name=HALL_V New Net Name=NetC12_2
+Change Net Name : Old Net Name=HALL_W New Net Name=NetC13_2
+Change Net Name : Old Net Name=HEARTBEAT_LED New Net Name=NetQ4_2
+Change Net Name : Old Net Name=MFIV New Net Name=NetP4_4
+Change Net Name : Old Net Name=MIVA New Net Name=NetP4_3
+Change Net Name : Old Net Name=MOT_PWM_U New Net Name=NetU2_1
+Change Net Name : Old Net Name=MOT_PWM_V New Net Name=NetU2_3
+Change Net Name : Old Net Name=MOT_PWM_W New Net Name=NetU2_5
+Change Net Name : Old Net Name=MOTOR_CURRENT_SENSE New Net Name=NetU3_1
+Change Net Name : Old Net Name=MOTOR_ENABLE New Net Name=NetU2_2
+Change Net Name : Old Net Name=MOTOR_FAIL New Net Name=NetR8_2
+Change Net Name : Old Net Name=MOTOR_TEMPERATURE New Net Name=NetC4_2
+Change Net Name : Old Net Name=MSDN New Net Name=NetP4_9
+Change Net Name : Old Net Name=MUU New Net Name=NetP4_6
+Change Net Name : Old Net Name=MVU New Net Name=NetP4_7
+Change Net Name : Old Net Name=MWU New Net Name=NetP4_8
+Change Net Name : Old Net Name=NRST New Net Name=NetC14_2
+Change Net Name : Old Net Name=OK_LED New Net Name=NetQ4_5
+Change Net Name : Old Net Name=PUMP_GROUND New Net Name=NetP9_3
+Change Net Name : Old Net Name=PUMP_PWM New Net Name=NetU4_5
+Change Net Name : Old Net Name=SWCLK New Net Name=NetP12_3
+Change Net Name : Old Net Name=SWDIO New Net Name=NetP12_2
+Change Net Name : Old Net Name=SYSTEM_VOLTAGE New Net Name=NetR29_2
+Change Net Name : Old Net Name=THROTTLE_0 New Net Name=NetR10_1
+Change Net Name : Old Net Name=THROTTLE_0_HI New Net Name=NetP8_4
+Change Net Name : Old Net Name=THROTTLE_1 New Net Name=NetR16_1
+Change Net Name : Old Net Name=THROTTLE_1_HI New Net Name=NetP8_5
+Change Net Name : Old Net Name=USART_RX New Net Name=NetP13_4
+Change Net Name : Old Net Name=USART_TX New Net Name=NetP13_5
+Added Member To Class: ClassName=IO Member=Component R36 330K 1% 0603
+Added Member To Class: ClassName=IO Member=Component R37 10K 5% 0603

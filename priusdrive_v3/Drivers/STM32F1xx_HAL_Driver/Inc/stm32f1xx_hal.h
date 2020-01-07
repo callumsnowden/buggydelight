@@ -53,6 +53,7 @@ extern "C" {
   * @{
   */
 
+/* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
 /** @defgroup HAL_Exported_Constants HAL Exported Constants
@@ -72,9 +73,6 @@ typedef enum
 /**
   * @}
   */
-/* Exported types ------------------------------------------------------------*/
-extern uint32_t uwTickPrio;
-extern HAL_TickFreqTypeDef uwTickFreq;
 
 /**
   * @}

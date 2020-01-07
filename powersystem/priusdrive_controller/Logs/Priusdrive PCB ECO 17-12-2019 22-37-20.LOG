@@ -1,0 +1,10 @@
+Removed Pin From Net: NetName=NetP5_1 Pin=TP3-1
+Added Component: Designator=R36(RESC0603(1608)_N)
+Added Component: Designator=R37(RESC0603(1608)_N)
+Added Pin To Net: NetName=DC_LINK_VOLTAGE Pin=R36-1
+Added Pin To Net: NetName=NetP5_1 Pin=R36-2
+Added Pin To Net: NetName=DC_LINK_VOLTAGE Pin=R37-1
+Added Pin To Net: NetName=GND Pin=R37-2
+Change Net Name : Old Net Name=DC_LINK_VOLTAGE New Net Name=NetR36_1
+Added Member To Class: ClassName=IO Member=Component R36 330K 1% 0603
+Added Member To Class: ClassName=IO Member=Component R37 10K 5% 0603
