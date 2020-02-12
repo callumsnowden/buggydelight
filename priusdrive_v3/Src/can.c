@@ -37,15 +37,15 @@ void MX_CAN_Init(void)
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 4;
   hcan.Init.Mode = CAN_MODE_NORMAL;
-    hcan.Init.SJW = CAN_SJW_1TQ;
-    hcan.Init.BS1 = CAN_BS1_13TQ;
-    hcan.Init.BS2 = CAN_BS2_2TQ;
-    hcan.Init.TTCM = DISABLE;
-    hcan.Init.ABOM = ENABLE;
-    hcan.Init.AWUM = ENABLE;
-    hcan.Init.NART = DISABLE;
-    hcan.Init.RFLM = DISABLE;
-    hcan.Init.TXFP = DISABLE;
+  hcan.Init.SJW = CAN_SJW_1TQ;
+  hcan.Init.BS1 = CAN_BS1_13TQ;
+  hcan.Init.BS2 = CAN_BS2_2TQ;
+  hcan.Init.TTCM = DISABLE;
+  hcan.Init.ABOM = ENABLE;
+  hcan.Init.AWUM = ENABLE;
+  hcan.Init.NART = DISABLE;
+  hcan.Init.RFLM = DISABLE;
+  hcan.Init.TXFP = DISABLE;
   if (HAL_CAN_Init(&hcan) != HAL_OK)
   {
     Error_Handler();
@@ -53,24 +53,24 @@ void MX_CAN_Init(void)
 
   hcan.pRxMsg = &RxMessage;
 
-    hcan.pTxMsg = &TxMessage;
-    hcan.pTxMsg->StdId = 0x01;
-    hcan.pTxMsg->ExtId = 0x0;
-    hcan.pTxMsg->RTR = CAN_RTR_DATA;
-    hcan.pTxMsg->IDE = CAN_ID_STD;
-    hcan.pTxMsg->DLC = 0; // this will be set by the code later on
-    sFilterConfig.FilterNumber = 0;
-    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-    sFilterConfig.FilterIdHigh = 0x0000;
-    sFilterConfig.FilterIdLow = 0x0000;
-    sFilterConfig.FilterMaskIdHigh = 0x0000;
-    sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = 0;
-    sFilterConfig.FilterActivation = ENABLE;
-    sFilterConfig.BankNumber = 14;
+  hcan.pTxMsg = &TxMessage;
+  hcan.pTxMsg->StdId = 0x01;
+  hcan.pTxMsg->ExtId = 0x0;
+  hcan.pTxMsg->RTR = CAN_RTR_DATA;
+  hcan.pTxMsg->IDE = CAN_ID_STD;
+  hcan.pTxMsg->DLC = 0; // this will be set by the code later on
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.BankNumber = 14;
 
-    HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
+  HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
 
 }
 

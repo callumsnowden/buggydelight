@@ -16,12 +16,40 @@
   *
   ******************************************************************************
   */
+
+
+/*
+ * ADC PIN ASSIGNMENTS
+ *
+ * IN4  / 0: Control current sense
+ * IN5  / 1: Motor current sense
+ * IN8  / 2: Drive temperature
+ * IN9  / 3: Motor temperature
+ * IN10 / 4: Throttle 0
+ * IN11 / 5: Throttle 1
+ * IN12 / 6: Coolant in temperature
+ * IN13 / 7: Coolant out temperature
+ * IN14 / 8: DC Link voltage
+ * IN15 / 9: System voltage
+ */
+
+/*
+ * Timer Assignments
+ *
+ * TIM1: Motor PWM
+ * TIM2: Hall effects input
+ * TIM3: Cooling PWM
+ * TIM4: Boost converter PWM
+ */
+
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
 #include "can.h"
+#include "dma.h"
+#include "iwdg.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -39,6 +67,10 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define COMMAND_ADDR 0x01
+#define CONFIG_ADDR 0x02
+//#define MULTI_THROTTLE_MODE
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,7 +82,57 @@
 
 /* USER CODE BEGIN PV */
 
-uint16_t LoopCount = 0;
+volatile uint16_t ThrottleMin = 700;
+volatile uint16_t ThrottleMax = 3450;
+
+volatile uint8_t ForwardReverseSelect = 0;
+volatile uint8_t InverterEnable = 0;
+
+volatile uint8_t ThrottleCommand = 0;
+volatile uint8_t LastThrottleCommand = 0;
+volatile uint8_t CANThrottleCommand = 0;
+
+volatile uint8_t ThrottleDisagreement = 0;
+volatile uint8_t ThrottleRampStep = 1;
+volatile uint8_t ThrottleRampTime = 5;
+volatile uint8_t ThrottleRunning = 0;
+
+volatile uint8_t MaxFanSpeed = 0;
+volatile uint8_t MaxPumpSpeed = 0;
+volatile uint8_t MaxMotorCurrent = 0;
+volatile uint8_t MaxMotorTemp = 0;
+volatile uint8_t MaxCoolantTemp = 0;
+
+volatile uint8_t MaxBoostVoltage = 0;
+volatile uint8_t BoostCommand = 0;
+
+volatile uint16_t ThrottleAveraging[10] = {0};
+volatile uint16_t DCLinkAveraging[10] = {0};
+
+static float DCLinkRatio = 0.0262901655;
+volatile float DCLinkVoltage = 0;
+
+volatile uint8_t Error = 0;
+
+volatile uint16_t LoopCount = 0;
+
+
+/*
+ * Array values
+ * 0: CONTROL_CURRENT_SENSE
+ * 1: MOTOR_CURRENT_SENSE
+ * 2: DRIVE_TEMPERATURE
+ * 3: MOTOR_TEMPERATURE
+ * 4: THROTTLE_0
+ * 5: THROTTLE_1
+ * 6: COOLANT_IN_TEMP
+ * 7: COOLANT_OUT_TEMP
+ * 8: DC_LINK_VOLTAGE
+ * 9: SYSTEM_VOLTAGE
+ *
+ */
+
+volatile uint16_t ADCRawValues[10];
 
 /* USER CODE END PV */
 
@@ -58,6 +140,11 @@ uint16_t LoopCount = 0;
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
+
+void AddValue(uint16_t newValue, uint16_t array[], uint8_t len);
+uint16_t CalculateArrayAverage(uint16_t array[], uint8_t len);
+uint8_t ScaleToPercentage(uint16_t input, uint16_t in_min, uint16_t in_max);
+void CheckSafeties();
 
 /* USER CODE END PFP */
 
@@ -98,6 +185,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART2_UART_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_CAN_Init();
   MX_TIM3_Init();
@@ -109,7 +197,11 @@ int main(void)
 
   hcan.Instance->MCR = 0x60;
 
+  __enable_irq();
+
   HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
+  //HAL_ADC_Start_IT(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADCRawValues, 10);
 
   /*
    * TIM_CHANNEL_1 / CCR1 is U
@@ -119,11 +211,16 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 
   HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO_Port, MOTOR_ENABLE_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_RESET);
 
-  TIM1->CCR2 = 50;
-  TIM1->CCR3 = 50;
+  TIM1->CCR2 = 100;
+  TIM1->CCR3 = 100;
+  TIM4->CCR1 = 0;
+
+  HAL_GPIO_WritePin(GPIOC, OK_LED_Pin, GPIO_PIN_SET);
 
   /* USER CODE END 2 */
 
@@ -134,19 +231,82 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if(Error == 0)
+	  {
+		  HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO_Port, MOTOR_ENABLE_Pin, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(GPIOD, DIAG_LED_1_Pin, GPIO_PIN_RESET);
 
-	  if(LoopCount == 1000) LoopCount = 0;
+		  //Set throttle
+		  if(ForwardReverseSelect == 1)
+		  {
+			  //Check to see if throttle has been released to decay throttle
+			  if(ThrottleCommand < LastThrottleCommand && LoopCount % ThrottleRampTime == 0)
+			  {
+				  TIM1->CCR2 = 100 + ThrottleCommand - ThrottleRampStep;
+				  TIM1->CCR3 = 100 - ThrottleCommand - ThrottleRampStep;
+				  LastThrottleCommand = LastThrottleCommand - ThrottleRampStep;
+			  } else if(ThrottleCommand > LastThrottleCommand){
+				  TIM1->CCR2 = 100 + ThrottleCommand;
+				  TIM1->CCR3 = 100 - ThrottleCommand;
+				  LastThrottleCommand = ThrottleCommand;
+			  }
+		  } else if(ForwardReverseSelect == 0)
+		  {
+			  //Check to see if throttle has been released to decay throttle
+			  if(ThrottleCommand < LastThrottleCommand && LoopCount % ThrottleRampTime == 0)
+			  {
+				  TIM1->CCR2 = 100 - ThrottleCommand - ThrottleRampStep;
+				  TIM1->CCR3 = 100 + ThrottleCommand - ThrottleRampStep;
+				  LastThrottleCommand = LastThrottleCommand - ThrottleRampStep;
+			  } else if(ThrottleCommand > LastThrottleCommand){
+				  TIM1->CCR2 = 100 - ThrottleCommand;
+				  TIM1->CCR3 = 100 + ThrottleCommand;
+				  LastThrottleCommand = ThrottleCommand;
+			  }
+		  }
 
-	  	if(LoopCount % 100 == 0)
-	  	{
-	  		hcan.pTxMsg->DLC = 1;
-	  		hcan.pTxMsg->Data[0] = 127;
-	  		HAL_CAN_Transmit(&hcan, 10);
-	  	}
+		  if(ThrottleCommand > 15)
+		  {
+			  ThrottleRunning = 1;
+			  TIM4->CCR1 = BoostCommand;
+		  }
+		  if(ThrottleCommand < 14)
+		  {
+			  ThrottleRunning = 0;
+			  TIM4->CCR1 = 0;
+		  }
+	  }
 
-	  	LoopCount++;
+	  if(Error == 1)
+	  {
+		  TIM1->CCR2 = 0;
+		  TIM1->CCR3 = 0;
+		  TIM4->CCR1 = 0;
 
-  HAL_Delay(1);
+		  HAL_GPIO_WritePin(GPIOD, DIAG_LED_1_Pin, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO_Port, MOTOR_ENABLE_Pin, GPIO_PIN_RESET);
+	  }
+
+	  if(LoopCount == 1000)
+	  {
+		  Error = 0;
+		  LoopCount = 0;
+	  }
+
+	  if(LoopCount % 100 == 0)
+	  {
+		  hcan.pTxMsg->DLC = 3;
+		  hcan.pTxMsg->Data[0] = (int)LoopCount / 100;
+		  hcan.pTxMsg->Data[1] = ThrottleCommand; //ScaleToPercentage(ADCRawValues[4], ThrottleMin, ThrottleMax);
+		  hcan.pTxMsg->Data[2] = (int)DCLinkVoltage;
+		  HAL_CAN_Transmit(&hcan, 10);
+		  HAL_GPIO_TogglePin(GPIOC, HEARTBEAT_LED_Pin);
+
+	  }
+
+	  LoopCount++;
+
+	  HAL_Delay(1);
   }
   /* USER CODE END 3 */
 }
@@ -163,9 +323,10 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
@@ -207,22 +368,82 @@ static void MX_NVIC_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_SYSTICK_Callback(void)
+void AddValue(uint16_t newValue, uint16_t array[], uint8_t len)
 {
-	if(LoopCount == 1000) LoopCount = 0;
-
-	if(LoopCount % 100 == 0)
+	for(uint8_t i = len - 1; i > 0; i--)
 	{
-		hcan.pTxMsg->DLC = 1;
-		hcan.pTxMsg->Data[0] = (int)LoopCount % 100;
-		HAL_CAN_Transmit(&hcan, 10);
+		array[i] = array[i-1];
 	}
 
-	LoopCount++;
+	array[0] = newValue;
+}
+
+uint16_t CalculateArrayAverage(uint16_t array[], uint8_t len)
+{
+	uint32_t average = 0;
+
+	for(uint8_t i = 0; i < len; i++)
+	{
+		average += array[i];
+	}
+
+	return average / len;
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	// Check safeties
+	CheckSafeties();
+
+	// Average throttle 0 ADC readings
+	AddValue(ADCRawValues[4], ThrottleAveraging, 10);
+
+	// Average DC link ADC readings
+	AddValue(ADCRawValues[8], DCLinkAveraging, 10);
+	DCLinkVoltage = (CalculateArrayAverage(DCLinkAveraging, 10) * (3.32 / 4096.0)) / DCLinkRatio;
+
+	// Calculate DC link voltage
+
+
+	// Calculate throttle percentage
+	ThrottleCommand = ScaleToPercentage(CalculateArrayAverage(ThrottleAveraging, 10), ThrottleMin, ThrottleMax);
+
+	HAL_GPIO_TogglePin(GPIOC, DIAG_LED_0_Pin);
 }
 
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
+	uint8_t CAN_ID = hcan->pRxMsg->StdId;
+
+	switch (CAN_ID) {
+	case COMMAND_ADDR:
+		if(hcan->pRxMsg->RTR == CAN_RTR_DATA)
+		{
+			//CAN Set command
+		}
+
+		if(hcan->pRxMsg->RTR == CAN_RTR_REMOTE)
+		{
+			//CAN Request command
+		}
+		break;
+
+	case CONFIG_ADDR:
+		if(hcan->pRxMsg->RTR == CAN_RTR_DATA)
+		{
+			//CAN Set command
+			ThrottleRampTime = hcan->pRxMsg->Data[0];
+			BoostCommand = hcan->pRxMsg->Data[1];
+		}
+
+		if(hcan->pRxMsg->RTR == CAN_RTR_REMOTE)
+		{
+			//CAN Request command
+		}
+		break;
+	}
+
+
 	if(hcan->pRxMsg->StdId == 0x01 && hcan->pRxMsg->IDE == CAN_ID_STD)
 	{
 		TIM1->CCR2 = 100 + hcan->pRxMsg->Data[0];
@@ -230,6 +451,37 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 	}
 
 	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+}
+
+uint8_t ScaleToPercentage(uint16_t input, uint16_t in_min, uint16_t in_max)
+{
+	uint8_t result = (100 * (input - in_min) / (in_max - in_min));
+	if(result >  100) result = 100;
+	if(result < 0) result = 0;
+	return result;
+}
+
+void CheckSafeties()
+{
+	//Check throttle bounds
+	if(ADCRawValues[4] < ThrottleMin - 100 || ADCRawValues[4] > ThrottleMax + 100)
+	{
+		Error = 1;
+	} else {
+		Error = 0;
+	}
+
+#ifdef MULTI_THROTTLE_MODE
+	if(ADCRawValues[5] < ThrottleMin - 100 || ADCRawValues[5] > ThrottleMax + 100)
+	{
+		Error = 1;
+	} else {
+		Error = 0;
+	}
+#endif
+
+	//Check boost voltage limits
+
 }
 
 /* USER CODE END 4 */
@@ -242,6 +494,8 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+
+	HAL_GPIO_WritePin(GPIOC, OK_LED_Pin, GPIO_PIN_RESET);
 
   /* USER CODE END Error_Handler_Debug */
 }
