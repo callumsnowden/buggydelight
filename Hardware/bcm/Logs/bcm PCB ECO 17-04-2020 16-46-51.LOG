@@ -1,0 +1,36 @@
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=C23-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=C25-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=C26-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=C27-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=P11-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=P11-4
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=P11-6
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=P11-7
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=R24-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=R26-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=R27-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=R28-2
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=U1-35
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=U1-37
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=U1-38
+Removed Pin From Net: NetName=SWITCH_DYNAMIC Pin=U1-39
+Added Pin To Net: NetName=SWITCH_ECO Pin=C25-2
+Added Pin To Net: NetName=SWITCH_ECO Pin=P11-4
+Added Pin To Net: NetName=SWITCH_ECO Pin=R26-2
+Added Pin To Net: NetName=SWITCH_ECO Pin=U1-35
+Added Net: Name=SWITCH_ECO
+Added Pin To Net: NetName=SWITCH_FWD Pin=C26-2
+Added Pin To Net: NetName=SWITCH_FWD Pin=P11-6
+Added Pin To Net: NetName=SWITCH_FWD Pin=R27-2
+Added Pin To Net: NetName=SWITCH_FWD Pin=U1-38
+Added Net: Name=SWITCH_FWD
+Added Pin To Net: NetName=SWITCH_REV Pin=C27-2
+Added Pin To Net: NetName=SWITCH_REV Pin=P11-7
+Added Pin To Net: NetName=SWITCH_REV Pin=R28-2
+Added Pin To Net: NetName=SWITCH_REV Pin=U1-39
+Added Net: Name=SWITCH_REV
+Added Pin To Net: NetName=SWITCH_SPORT Pin=C23-2
+Added Pin To Net: NetName=SWITCH_SPORT Pin=P11-2
+Added Pin To Net: NetName=SWITCH_SPORT Pin=R24-2
+Added Pin To Net: NetName=SWITCH_SPORT Pin=U1-37
+Added Net: Name=SWITCH_SPORT

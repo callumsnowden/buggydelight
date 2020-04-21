@@ -1,0 +1,5 @@
+Removed Pin From Net: NetName=LIGHT_DRL_POS Pin=P9-2
+Removed Pin From Net: NetName=GND Pin=P9-3
+Added Pin To Net: NetName=LIGHT_BRAKE_POS Pin=P9-2
+Added Pin To Net: NetName=LIGHT_BRAKE_NEG Pin=P9-3
+Change Net Name : Old Net Name=LIGHT_BRAKE_NEG New Net Name=LIGHT_REV_POS
