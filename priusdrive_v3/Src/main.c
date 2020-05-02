@@ -69,6 +69,7 @@
 
 #define COMMAND_ADDR 0x01
 #define CONFIG_ADDR 0x02
+#define REGEN_ADDR 0x03
 //#define MULTI_THROTTLE_MODE
 
 /* USER CODE END PD */
@@ -82,10 +83,10 @@
 
 /* USER CODE BEGIN PV */
 
-volatile uint16_t ThrottleMin = 700;
-volatile uint16_t ThrottleMax = 3450;
+volatile uint16_t ThrottleMin = 747;
+volatile uint16_t ThrottleMax = 3655;
 
-volatile uint8_t ForwardReverseSelect = 0;
+volatile uint8_t ForwardReverseSelect = 1;
 volatile uint8_t InverterEnable = 0;
 
 volatile uint8_t ThrottleCommand = 0;
@@ -104,7 +105,8 @@ volatile uint8_t MaxMotorTemp = 0;
 volatile uint8_t MaxCoolantTemp = 0;
 
 volatile uint8_t MaxBoostVoltage = 0;
-volatile uint8_t BoostCommand = 0;
+volatile uint8_t RequestedDCLinkVoltage = 0;
+volatile uint8_t BoostPwm = 0;
 
 volatile uint16_t ThrottleAveraging[10] = {0};
 volatile uint16_t DCLinkAveraging[10] = {0};
@@ -115,6 +117,8 @@ volatile float DCLinkVoltage = 0;
 volatile uint8_t Error = 0;
 
 volatile uint16_t LoopCount = 0;
+
+volatile uint8_t RegenEnable = 1;
 
 
 /*
@@ -201,6 +205,9 @@ int main(void)
 
   HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
   //HAL_ADC_Start_IT(&hadc1);
+
+  if(HAL_ADCEx_Calibration_Start(&hadc1) == HAL_ERROR) Error_Handler();
+
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADCRawValues, 10);
 
   /*
@@ -234,21 +241,46 @@ int main(void)
 	  if(Error == 0)
 	  {
 		  HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO_Port, MOTOR_ENABLE_Pin, GPIO_PIN_SET);
+		  //HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_RESET);
 		  HAL_GPIO_WritePin(GPIOD, DIAG_LED_1_Pin, GPIO_PIN_RESET);
 
 		  //Set throttle
 		  if(ForwardReverseSelect == 1)
 		  {
-			  //Check to see if throttle has been released to decay throttle
-			  if(ThrottleCommand < LastThrottleCommand && LoopCount % ThrottleRampTime == 0)
+			  if(RegenEnable == 1)
 			  {
-				  TIM1->CCR2 = 100 + ThrottleCommand - ThrottleRampStep;
-				  TIM1->CCR3 = 100 - ThrottleCommand - ThrottleRampStep;
-				  LastThrottleCommand = LastThrottleCommand - ThrottleRampStep;
-			  } else if(ThrottleCommand > LastThrottleCommand){
-				  TIM1->CCR2 = 100 + ThrottleCommand;
-				  TIM1->CCR3 = 100 - ThrottleCommand;
-				  LastThrottleCommand = ThrottleCommand;
+				  if(ThrottleCommand < LastThrottleCommand && LoopCount % ThrottleRampTime == 0)
+				  {
+					  //Gently release throttle
+					  //HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_SET);
+					  TIM1->CCR2 = 100 + ThrottleCommand - ThrottleRampStep;
+					  TIM1->CCR3 = 100 - ThrottleCommand - ThrottleRampStep;
+					  LastThrottleCommand = LastThrottleCommand - ThrottleRampStep;
+
+				  } else if(ThrottleCommand > LastThrottleCommand){
+					  //Increase throttle command
+					  //HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_SET);
+					  TIM1->CCR2 = 100 + ThrottleCommand;
+					  TIM1->CCR3 = 100 - ThrottleCommand;
+					  LastThrottleCommand = ThrottleCommand;
+				  }
+			  } else if(RegenEnable == 0)
+			  {
+				  if(ThrottleCommand < LastThrottleCommand && LoopCount % ThrottleRampTime == 0)
+				  {
+					  //Gently release throttle with no regen
+					  //HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_SET);
+				  	  TIM1->CCR2 = 100 + ThrottleCommand - ThrottleRampStep;
+				  	  TIM1->CCR3 = 100 - ThrottleCommand - ThrottleRampStep;
+				  	  LastThrottleCommand = LastThrottleCommand - ThrottleRampStep;
+
+				  } else if(ThrottleCommand > LastThrottleCommand){
+				  	  //Increase throttle command
+					  //HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_RESET);
+				  	  TIM1->CCR2 = 100 + ThrottleCommand;
+				  	  TIM1->CCR3 = 100 - ThrottleCommand;
+				  	  LastThrottleCommand = ThrottleCommand;
+				  }
 			  }
 		  } else if(ForwardReverseSelect == 0)
 		  {
@@ -265,15 +297,27 @@ int main(void)
 			  }
 		  }
 
+
+		  //Boost converter control
 		  if(ThrottleCommand > 15)
 		  {
 			  ThrottleRunning = 1;
-			  TIM4->CCR1 = BoostCommand;
+			  if(DCLinkVoltage < RequestedDCLinkVoltage && BoostPwm < 150)
+			  {
+				  HAL_GPIO_WritePin(BOOST_ENABLE_GPIO_Port, BOOST_ENABLE_Pin, GPIO_PIN_RESET);
+				  TIM4->CCR1 = BoostPwm += 1;
+			  }
+
+			  if(DCLinkVoltage > RequestedDCLinkVoltage + 1 && BoostPwm > 0)
+			  {
+				  TIM4->CCR1 = BoostPwm -= 1;
+			  }
 		  }
-		  if(ThrottleCommand < 14)
+		  if(ThrottleCommand < 10)
 		  {
 			  ThrottleRunning = 0;
-			  TIM4->CCR1 = 0;
+			  BoostPwm = 0;
+			  TIM4->CCR1 = BoostPwm;
 		  }
 	  }
 
@@ -295,10 +339,11 @@ int main(void)
 
 	  if(LoopCount % 100 == 0)
 	  {
-		  hcan.pTxMsg->DLC = 3;
+		  hcan.pTxMsg->DLC = 4;
 		  hcan.pTxMsg->Data[0] = (int)LoopCount / 100;
 		  hcan.pTxMsg->Data[1] = ThrottleCommand; //ScaleToPercentage(ADCRawValues[4], ThrottleMin, ThrottleMax);
 		  hcan.pTxMsg->Data[2] = (int)DCLinkVoltage;
+		  hcan.pTxMsg->Data[3] = BoostPwm;
 		  HAL_CAN_Transmit(&hcan, 10);
 		  HAL_GPIO_TogglePin(GPIOC, HEARTBEAT_LED_Pin);
 
@@ -400,10 +445,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 	// Average DC link ADC readings
 	AddValue(ADCRawValues[8], DCLinkAveraging, 10);
-	DCLinkVoltage = (CalculateArrayAverage(DCLinkAveraging, 10) * (3.32 / 4096.0)) / DCLinkRatio;
 
 	// Calculate DC link voltage
-
+	DCLinkVoltage = (CalculateArrayAverage(DCLinkAveraging, 10) * (3.32 / 4096.0)) / DCLinkRatio;
 
 	// Calculate throttle percentage
 	ThrottleCommand = ScaleToPercentage(CalculateArrayAverage(ThrottleAveraging, 10), ThrottleMin, ThrottleMax);
@@ -433,12 +477,19 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 		{
 			//CAN Set command
 			ThrottleRampTime = hcan->pRxMsg->Data[0];
-			BoostCommand = hcan->pRxMsg->Data[1];
+			RequestedDCLinkVoltage = hcan->pRxMsg->Data[1];
 		}
 
 		if(hcan->pRxMsg->RTR == CAN_RTR_REMOTE)
 		{
 			//CAN Request command
+		}
+		break;
+
+	case REGEN_ADDR:
+		if(hcan->pRxMsg->RTR == CAN_RTR_DATA)
+		{
+			RegenEnable = hcan->pRxMsg->Data[0];
 		}
 		break;
 	}
