@@ -1,0 +1,127 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: BCM VRM Power_Controller Boost_Converter Inverter
+VAL_TABLE_ Driving_Mode 2 "Sport" 1 "Dynamic" 0 "Eco" ;
+VAL_TABLE_ Throttle_Inversion_Mode 1 "Throttle inverted" 0 "Throttle normal" ;
+VAL_TABLE_ Throttle_Mode 1 "CAN bus throttle" 0 "Analogue throttle" ;
+VAL_TABLE_ Forward_Reverse_Mode 1 "Reverse" 0 "Forward" ;
+
+
+BO_ 11 VRM_Configuration: 1 VRM
+ SG_ Max_12V_Main_Current : 0|8@1+ (0.1,0) [0|25.5] "A" Vector__XXX
+
+BO_ 10 Power_Controller_Configuration: 5 Power_Controller
+ SG_ Precharge_Cutoff_Voltage : 32|8@1+ (1,0) [0|255] "V" Vector__XXX
+ SG_ HV_Precharge_Timeout : 24|8@1+ (0.1,0) [0|25.5] "s" Vector__XXX
+ SG_ HV_Relay_Delay : 16|8@1+ (0.1,0) [0|25.5] "s" Vector__XXX
+ SG_ Battery_Voltage_Upper_Limit : 8|8@1+ (1,0) [0|255] "V" Vector__XXX
+ SG_ Battery_Voltage_Lower_Limit : 0|8@1+ (1,0) [0|255] "V" Vector__XXX
+
+BO_ 9 Inverter_Configuration: 8 Inverter
+ SG_ Throttle_Mode : 5|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle_Ramp_Time : 56|8@1+ (1,0) [0|255] "ms"  Inverter
+ SG_ Throttle_Ramp_Step : 48|8@1+ (1,0) [0|100] "%"  Inverter
+ SG_ Throttle1_Low_Calibration_Start : 3|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle1_Inversion_Mode : 4|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle1_High_Calibration_Start : 2|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle0_Low_Calibration_Start : 1|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle0_High_Calibration_Start : 0|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Max_Throttle_Imbalance : 40|8@1+ (1,0) [0|100] "%"  Inverter
+ SG_ Max_Motor_Temperature : 24|8@1+ (1,0) [0|255] "°C"  Inverter
+ SG_ Max_Motor_Current : 8|8@1+ (1,0) [0|255] "A"  Inverter
+ SG_ Max_Field_Current : 16|8@1+ (0.1,0) [0|25.5] "A"  Inverter
+ SG_ Max_Fan_Speed : 32|8@1+ (1,0) [0|255] ""  Inverter
+
+BO_ 8 Boost_Configuration: 2 Boost_Converter
+ SG_ Max_Link_Voltage : 8|8@1+ (1,0) [0|255] "V" Vector__XXX
+ SG_ Max_Boost_Pulse : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 7 Power_Controller_Status: 2 Power_Controller
+ SG_ ADC_Calibration_Fail : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HV_Precharge_Failure : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HV_Disconnect_Failure : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HV_Connect_Failure : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Battery_Voltage : 8|8@1+ (1,0) [0|255] "V" Vector__XXX
+
+BO_ 6 Power_Controller_Command: 1 BCM
+ SG_ HV_Bus_Enable : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 5 VRM_Status: 5 VRM
+ SG_ Main_12V_Overcurrent : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Aux_12V_Overcurrent : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Main_12V_Voltage : 24|8@1+ (0.1,0) [0|25.5] "V" Vector__XXX
+ SG_ Main_12V_Current : 32|8@1+ (0.1,0) [0|25.5] "A" Vector__XXX
+ SG_ Aux_12V_Voltage : 8|8@1+ (0.1,0) [0|25.5] "V" Vector__XXX
+ SG_ Aux_12V_Current : 16|8@1+ (0.1,0) [0|25.5] "A" Vector__XXX
+ SG_ ADC_Calibration_Fail : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 4 VRM_Command: 1 BCM
+ SG_ VRM_Enable : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 3 Boost_Status: 2 Boost_Converter
+ SG_ ADC_Calibration_Fail : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Boost_Failure : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Boost_Actual_Voltage : 8|8@1+ (1,0) [0|255] "V" Vector__XXX
+
+BO_ 2 Boost_Command: 2 BCM
+ SG_ Boost_Requested_Voltage : 8|8@1+ (1,0) [0|255] "V"  Boost_Converter
+ SG_ Boost_Enable : 0|1@1+ (1,0) [0|1] ""  Boost_Converter
+
+BO_ 1 Inverter_Status: 8 Inverter
+ SG_ Motor_Temperature : 56|8@1+ (1,0) [0|255] "°C" Vector__XXX
+ SG_ Drive_Temperature : 48|8@1+ (1,0) [0|255] "°C" Vector__XXX
+ SG_ Coolant_In_Temperature : 40|8@1+ (1,0) [0|255] "°C" Vector__XXX
+ SG_ Coolant_Out_Temperature : 32|8@1+ (1,0) [0|255] "°C" Vector__XXX
+ SG_ Motor_Speed : 24|8@1+ (40,0) [0|10200] "RPM" Vector__XXX
+ SG_ Inverter_Failure : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Field_Current : 16|8@1+ (0.1,0) [0|25.5] "A" Vector__XXX
+ SG_ ADC_Calibration_Fail : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 0 Inverter_Command: 2 BCM
+ SG_ Forward_Reverse_Select : 1|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Throttle_Command : 8|8@1+ (1,0) [0|100] "%"  Inverter
+ SG_ Inverter_Enable : 0|1@1+ (1,0) [0|1] ""  Inverter
+ SG_ Driving_Mode : 2|2@1+ (1,0) [0|3] ""  Inverter
+
+
+
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+VAL_ 9 Throttle_Mode 1 "CAN bus throttle" 0 "Analogue throttle" ;
+VAL_ 9 Throttle1_Inversion_Mode 1 "Throttle inverted" 0 "Throttle normal" ;
+VAL_ 0 Forward_Reverse_Select 1 "Reverse" 0 "Forward" ;
+VAL_ 0 Driving_Mode 2 "Sport" 1 "Dynamic" 0 "Eco" ;
+

@@ -69,6 +69,7 @@ BO_ 4 Boost_Configuration: 2 Boost_Converter
  SG_ Max_Bus_Voltage : 0|8@1+ (1,0) [0|254] "V" Vector__XXX
 
 BO_ 3 Boost_Command: 3 Boost_Converter
+ SG_ Boost_Fail : 17|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ Boost_Enable : 16|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ Boost_Actual_Voltage : 8|8@1+ (1,0) [0|254] "V" Vector__XXX
  SG_ Boost_Desired_Voltage : 0|8@1+ (1,0) [0|254] "V" Vector__XXX
@@ -84,6 +85,7 @@ BO_ 2 Inverter_Configuration: 8 Inverter
  SG_ Max_Motor_Current : 24|8@1+ (1,0) [0|254] "A" Vector__XXX
 
 BO_ 1 Inverter_Command: 2 Inverter
+ SG_ ADC_Calibration_Fail : 10|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ Fwd_Rev_Select : 9|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ Inverter_Enable : 8|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ Throttle_Command : 0|8@1+ (1,0) [0|100] "%" Vector__XXX
