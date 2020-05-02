@@ -1,0 +1,22 @@
+---------------------------------------------------------------------------
+NCDrill File Report For: bcm.CSPcbDoc   23/04/2020  15:35:33
+---------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : bcm.TXT
+
+Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
+---------------------------------------------------------------------------
+T1        15mil (0.381mm)          Round          26               3.53 Inch (89.64 mm)
+T2        20mil (0.508mm)          Round          57               11.71 Inch (297.55 mm)
+T3        22mil (0.5588mm)         Round          1                0.00 Inch (0.00 mm)
+T4        28mil (0.7112mm)         Round          50               16.90 Inch (429.30 mm)
+T5        43.31mil (1.10007mm)     Round          32               4.67 Inch (118.72 mm)
+T6        47.24mil (1.1999mm)      Round          16               5.89 Inch (149.62 mm)
+T7        70.87mil (1.8001mm)      Round          10               8.62 Inch (218.96 mm)
+T8        118.11mil (2.99999mm)    Round          3         NPTH   7.21 Inch (183.07 mm)
+T9        122.05mil (3.10007mm)    Round          8         NPTH   2.62 Inch (66.42 mm)
+---------------------------------------------------------------------------
+Totals                                            203              61.15 Inch (1553.27 mm)
+
+Total Processing Time (hh:mm:ss) : 00:00:00

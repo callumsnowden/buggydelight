@@ -1,0 +1,16 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 15:35:32 On 23/04/2020
+
+Output: NC Drill
+Type  : NC Drill
+From  : PCB Document [bcm.CSPcbDoc]
+   Generated File[bcm.TXT]
+   Generated File[bcm.LDP]
+   Generated File[bcm.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 15:35:33 On 23/04/2020
